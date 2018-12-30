@@ -7,10 +7,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Feed struct {
-	Link    string  `xml:"link"`
+	Link    Link    `xml:"href, attr"`
 	Title   string  `xml:"title"`
 	Id      string  `xml:"id"`
 	Updated string  `xml:"updated"`
@@ -23,16 +24,22 @@ type Entry struct {
 	Published string   `xml:"published"`
 	Title     string   `xml:"title"`
 	Summary   string   `xml:"summary"`
-	Author    []Author `xml:"author"`
-	Category  string   `xml:"category"`
+	Authors   []Author `xml:"author"`
+	Category  Category `xml:"category"`
+	Links     []Link   `xml:"link"`
+}
+
+type Category struct {
+	Name string `xml:"term,attr"`
+}
+
+type Link struct {
+	Title string `xml:"title,attr"`
+	Value string `xml:"href,attr"`
+	Type  string `xml:"type,attr"`
 }
 
 type Author struct {
-	Name string `xml:"name"`
-}
-
-type Paper struct {
-	Id   string `xml:"id"`
 	Name string `xml:"name"`
 }
 
@@ -72,9 +79,31 @@ func searchPaper(titleQuery string) []Entry {
 	return xmlObj.Entries
 }
 
+func EprintUrl(paper Entry) (string, error) {
+	var url string
+	var found bool
+
+	found = false
+	for i := 0; i < len(paper.Links); i++ {
+		link := paper.Links[i]
+		if link.Title == "pdf" {
+			url = link.Value
+			found = true
+			break
+		}
+	}
+	if !found {
+		fmt.Errorf("The resource (e-print) of the requested paper is not found.")
+	}
+
+	url = strings.Replace(url, "/pdf", "/e-print", 1)
+	url = strings.Replace(url, ".pdf", "", 1)
+	return url, nil
+}
+
 func main() {
 	entries := searchPaper("Generative Adversarial Nets")
 	for i := 0; i < len(entries); i++ {
-		fmt.Printf("- %+v\n", entries[i])
+		fmt.Printf("- %+v\n", entries[i].Links)
 	}
 }
