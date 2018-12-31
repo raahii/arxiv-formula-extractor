@@ -49,6 +49,6 @@ func TestEprintUrl(t *testing.T) {
 
 	expected := "http://arxiv.org/e-print/astro-ph/0608371v1"
 	if actual != expected {
-		t.Fatalf("\ngot %#v\nwant %#v", actual, expected)
+		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
 	}
 }

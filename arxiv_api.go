@@ -12,6 +12,29 @@ import (
 	"strings"
 )
 
+func EprintUrl(paper Entry) (string, error) {
+	var url string
+	var found bool
+
+	found = false
+	for i := 0; i < len(paper.Links); i++ {
+		link := paper.Links[i]
+		if link.Title == "pdf" {
+			url = link.Value
+			found = true
+			break
+		}
+	}
+	if !found {
+		fmt.Errorf("The resource (e-print) of the requested paper is not found.")
+	}
+
+	url = strings.Replace(url, "/pdf", "/e-print", 1)
+	url = strings.Replace(url, ".pdf", "", 1)
+
+	return url, nil
+}
+
 func DownloadTarball(url string, path string) error {
 	// Create the file
 	out, err := os.Create(path)
@@ -41,6 +64,7 @@ func parseXML(xmlStr string) Feed {
 	if err := xml.Unmarshal([]byte(xmlStr), &result); err != nil {
 		log.Fatal(err)
 	}
+
 	return result
 }
 
@@ -72,34 +96,23 @@ func SearchPaper(titleQuery string) Feed {
 	return xmlObj
 }
 
-func EprintUrl(paper Entry) (string, error) {
-	var url string
-	var found bool
+func RemoveTagLines(str string, tags []string) string {
+	lines := strings.Split(str, "\n")
 
-	found = false
-	for i := 0; i < len(paper.Links); i++ {
-		link := paper.Links[i]
-		if link.Title == "pdf" {
-			url = link.Value
-			found = true
-			break
+	var found bool
+	new_lines := []string{}
+	for _, line := range lines {
+		found = false
+		for _, tag := range tags {
+			if strings.Contains(line, tag) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			new_lines = append(new_lines, line)
 		}
 	}
-	if !found {
-		fmt.Errorf("The resource (e-print) of the requested paper is not found.")
-	}
 
-	url = strings.Replace(url, "/pdf", "/e-print", 1)
-	url = strings.Replace(url, ".pdf", "", 1)
-	return url, nil
-}
-
-func main() {
-	result := SearchPaper("Generative Adversarial Nets")
-	fmt.Printf("%+v\n", result.TotalResults)
-	fmt.Printf("%+v\n", result.StartIndex)
-	fmt.Printf("%+v\n", result.ItemsPerPage)
-	// for i := 0; i < len(entries); i++ {
-	// 	fmt.Printf("- %+v\n", entries[i].Links)
-	// }
+	return strings.Join(new_lines, "\n")
 }
