@@ -8,11 +8,28 @@ import (
 	"strings"
 )
 
-type Equation struct {
-	text string
+func RemoveTagLines(str string, tags []string) string {
+	lines := strings.Split(str, "\n")
+
+	var found bool
+	new_lines := []string{}
+	for _, line := range lines {
+		found = false
+		for _, tag := range tags {
+			if strings.Contains(line, tag) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			new_lines = append(new_lines, line)
+		}
+	}
+
+	return strings.Join(new_lines, "\n")
 }
 
-func findEquation(source string) []Equation {
+func FindEquations(source string) []Equation {
 	if !strings.Contains(source, "{equation}") {
 		return nil
 	}
@@ -22,7 +39,8 @@ func findEquation(source string) []Equation {
 
 	equations := []Equation{}
 	for _, s := range m {
-		equations = append(equations, Equation{s[1]})
+		str := strings.Trim(s[1], "\n\t")
+		equations = append(equations, Equation{str})
 	}
 	return equations
 }
@@ -32,7 +50,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	equations := findEquation(string(data))
+
+	equations := FindEquations(string(data))
 	for _, s := range equations {
 		fmt.Printf("%v\n", s)
 	}

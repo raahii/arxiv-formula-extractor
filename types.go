@@ -35,3 +35,7 @@ type Link struct {
 type Author struct {
 	Name string `xml:"name"`
 }
+
+type Equation struct {
+	text string
+}

@@ -95,24 +95,3 @@ func SearchPaper(titleQuery string) Feed {
 
 	return xmlObj
 }
-
-func RemoveTagLines(str string, tags []string) string {
-	lines := strings.Split(str, "\n")
-
-	var found bool
-	new_lines := []string{}
-	for _, line := range lines {
-		found = false
-		for _, tag := range tags {
-			if strings.Contains(line, tag) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			new_lines = append(new_lines, line)
-		}
-	}
-
-	return strings.Join(new_lines, "\n")
-}
