@@ -3,44 +3,37 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
-type Feed struct {
-	Link    Link    `xml:"href, attr"`
-	Title   string  `xml:"title"`
-	Id      string  `xml:"id"`
-	Updated string  `xml:"updated"`
-	Entries []Entry `xml:"entry"`
-}
+func DownloadTarball(url string, path string) error {
+	// Create the file
+	out, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
 
-type Entry struct {
-	Id        string   `xml:"id"`
-	Updated   string   `xml:"updated"`
-	Published string   `xml:"published"`
-	Title     string   `xml:"title"`
-	Summary   string   `xml:"summary"`
-	Authors   []Author `xml:"author"`
-	Category  Category `xml:"category"`
-	Links     []Link   `xml:"link"`
-}
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
-type Category struct {
-	Name string `xml:"term,attr"`
-}
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
 
-type Link struct {
-	Title string `xml:"title,attr"`
-	Value string `xml:"href,attr"`
-	Type  string `xml:"type,attr"`
-}
-
-type Author struct {
-	Name string `xml:"name"`
+	return nil
 }
 
 func parseXML(xmlStr string) Feed {
@@ -51,7 +44,7 @@ func parseXML(xmlStr string) Feed {
 	return result
 }
 
-func searchPaper(titleQuery string) []Entry {
+func SearchPaper(titleQuery string) Feed {
 	u, err := url.Parse("http://export.arxiv.org/api/query")
 	if err != nil {
 		log.Fatal(err)
@@ -76,7 +69,7 @@ func searchPaper(titleQuery string) []Entry {
 
 	xmlObj := parseXML(string(xmlBytes))
 
-	return xmlObj.Entries
+	return xmlObj
 }
 
 func EprintUrl(paper Entry) (string, error) {
@@ -102,8 +95,11 @@ func EprintUrl(paper Entry) (string, error) {
 }
 
 func main() {
-	entries := searchPaper("Generative Adversarial Nets")
-	for i := 0; i < len(entries); i++ {
-		fmt.Printf("- %+v\n", entries[i].Links)
-	}
+	result := SearchPaper("Generative Adversarial Nets")
+	fmt.Printf("%+v\n", result.TotalResults)
+	fmt.Printf("%+v\n", result.StartIndex)
+	fmt.Printf("%+v\n", result.ItemsPerPage)
+	// for i := 0; i < len(entries); i++ {
+	// 	fmt.Printf("- %+v\n", entries[i].Links)
+	// }
 }
