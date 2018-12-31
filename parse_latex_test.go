@@ -36,3 +36,26 @@ func TestFindEquations(t *testing.T) {
 		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
 	}
 }
+
+func TestRemoveComment(t *testing.T) {
+	input := `%hogehoge
+		% fugafuga
+	\begin{equation}
+	y=ax
+	\end{equation}
+	foo % bar
+	`
+
+	actual := RemoveComment(input)
+
+	expected := `
+		
+	\begin{equation}
+	y=ax
+	\end{equation}
+	foo 
+	`
+	if actual != expected {
+		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
+	}
+}

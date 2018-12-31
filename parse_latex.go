@@ -8,6 +8,14 @@ import (
 	"strings"
 )
 
+func RemoveComment(str string) string {
+	var re = regexp.MustCompile("%.*")
+	s := re.ReplaceAllString(str, ``)
+
+	return s
+
+}
+
 func RemoveTagLines(str string, tags []string) string {
 	lines := strings.Split(str, "\n")
 
@@ -39,7 +47,9 @@ func FindEquations(source string) []Equation {
 
 	equations := []Equation{}
 	for _, s := range m {
-		str := strings.Trim(s[1], "\n\t")
+		str := s[1]
+		str = strings.TrimLeft(str, "\n\t")
+		str = strings.TrimRight(str, "\n\t")
 		equations = append(equations, Equation{str})
 	}
 	return equations
@@ -51,8 +61,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	equations := FindEquations(string(data))
+	latex_source := string(data)
+	latex_source = RemoveComment(latex_source)
+
+	equations := FindEquations(latex_source)
 	for _, s := range equations {
-		fmt.Printf("%v\n", s)
+		fmt.Printf("%v\n", RemoveTagLines(s.Text, []string{`\label`}))
 	}
 }
