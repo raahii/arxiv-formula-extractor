@@ -68,7 +68,7 @@ func parseXML(xmlStr string) Feed {
 	return result
 }
 
-func SearchPaper(titleQuery string) Feed {
+func SearchPapers(titleQuery string) Feed {
 	u, err := url.Parse("http://export.arxiv.org/api/query")
 	if err != nil {
 		log.Fatal(err)

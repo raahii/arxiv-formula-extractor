@@ -16,7 +16,7 @@ func main() {
 
 	// handlers
 	e.GET("/hello", handlers.TestPage())
-	e.GET("/papers", handlers.SearchPaper())
+	e.GET("/papers", handlers.SearchPapers())
 
 	// start
 	e.Start(":1323")
