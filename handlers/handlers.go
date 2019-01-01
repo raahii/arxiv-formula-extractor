@@ -14,7 +14,8 @@ func TestPage() echo.HandlerFunc {
 
 func SearchPaper() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		papers := []arxiv.Entry{arxiv.Entry{}}
+		result := arxiv.SearchPaper("GAN")
+		papers := result.Entries
 		return c.JSON(http.StatusOK, papers)
 	}
 }

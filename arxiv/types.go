@@ -1,14 +1,14 @@
 package arxiv
 
 type Feed struct {
-	Link         Link    `xml:"href, attr"`
-	Title        string  `xml:"title"`
-	Id           string  `xml:"id"`
-	Updated      string  `xml:"updated"`
-	Entries      []Entry `xml:"entry"`
-	TotalResults int32   `xml:"totalResults"`
-	StartIndex   int32   `xml:"startIndex"`
-	ItemsPerPage int32   `xml:"itemsPerPage"`
+	Link         Link    `xml:"href, attr" json:"link"`
+	Title        string  `xml:"title" json:"title"`
+	Id           string  `xml:"id" json:"id"`
+	Updated      string  `xml:"updated" json:"updated"`
+	Entries      []Entry `xml:"entry" json:"entries"`
+	TotalResults int32   `xml:"totalResults" json:"total_results"`
+	StartIndex   int32   `xml:"startIndex" json:"start_index"`
+	ItemsPerPage int32   `xml:"itemsPerPage" json:"items_per_page"`
 }
 
 type Entry struct {
@@ -17,9 +17,9 @@ type Entry struct {
 	Published string   `xml:"published" json:"published"`
 	Title     string   `xml:"title" json:"title"`
 	Summary   string   `xml:"summary" json:"summary"`
-	Authors   []Author `xml:"author" json:"author"`
+	Authors   []Author `xml:"author" json:"authors"`
 	Category  Category `xml:"category" json:"category"`
-	Links     []Link   `xml:"link" json:"link"`
+	Links     []Link   `xml:"link" json:"links"`
 }
 
 type Category struct {
@@ -27,13 +27,13 @@ type Category struct {
 }
 
 type Link struct {
-	Title string `xml:"title,attr"`
-	Value string `xml:"href,attr"`
-	Type  string `xml:"type,attr"`
+	Title string `xml:"title,attr" json:"title"`
+	Value string `xml:"href,attr" json:"value"`
+	Type  string `xml:"type,attr" json:"type"`
 }
 
 type Author struct {
-	Name string `xml:"name"`
+	Name string `xml:"name" json:"name"`
 }
 
 type Equation struct {
