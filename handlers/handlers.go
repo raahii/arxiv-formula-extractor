@@ -60,12 +60,27 @@ func SearchPapers() echo.HandlerFunc {
 		}
 
 		response := map[string]interface{}{
-			"status": "ok",
-			"data": map[string]interface{}{
-				"query":     query,
-				"n_results": len(papers),
-				"papers":    papers,
-			},
+			"query":     query,
+			"n_results": len(papers),
+			"papers":    papers,
+		}
+
+		return c.JSON(http.StatusOK, response)
+	}
+}
+
+func ShowPaper() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		paper := Paper{}
+		paper.Id = int32(id)
+		paper.Title = "sample paper"
+
+		response := map[string]interface{}{
+			"paper": paper,
 		}
 
 		return c.JSON(http.StatusOK, response)
