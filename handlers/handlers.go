@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func TestPage() echo.HandlerFunc {
@@ -21,7 +20,7 @@ func toIntIdAndVersion(apiId string) (int32, int32) {
 	urlElems := strings.Split(apiId, "/")
 	lastElem := urlElems[len(urlElems)-1]
 	paperStr := strings.Split(lastElem, "v")
-	id, err := strconv.Atoi(paperStr[0])
+	id, err := strconv.Atoi(strings.Replace(paperStr[0], ".", "", -1))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +34,8 @@ func toIntIdAndVersion(apiId string) (int32, int32) {
 
 func SearchPapers() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		apiResult := arxiv.SearchPapers("GAN")
+		query := c.QueryParam("q")
+		apiResult := arxiv.SearchPapers(query)
 		apiEntries := apiResult.Entries
 
 		// convert api result to paper entity
@@ -48,6 +48,7 @@ func SearchPapers() echo.HandlerFunc {
 				authors = append(authors, a.Name)
 			}
 
+			// make a paper entitiy
 			paper := Paper{}
 			paper.Id = id
 			paper.Version = ver
@@ -57,6 +58,16 @@ func SearchPapers() echo.HandlerFunc {
 
 			papers = append(papers, paper)
 		}
-		return c.JSON(http.StatusOK, papers)
+
+		response := map[string]interface{}{
+			"status": "ok",
+			"data": map[string]interface{}{
+				"query":     query,
+				"n_results": len(papers),
+				"papers":    papers,
+			},
+		}
+
+		return c.JSON(http.StatusOK, response)
 	}
 }
