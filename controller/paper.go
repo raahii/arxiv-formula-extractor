@@ -1,8 +1,8 @@
-package handlers
+package controller
 
 import (
 	"github.com/labstack/echo"
-	arxiv "github.com/raahii/latexeq-copier/arxiv"
+	"github.com/raahii/arxiv-resources/arxiv"
 	"log"
 	"net/http"
 	"strconv"
@@ -71,10 +71,13 @@ func SearchPapers() echo.HandlerFunc {
 
 func ShowPaper() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		// obtain path parameter
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// find the paper
 		paper := Paper{}
 		paper.Id = int32(id)
 		paper.Title = "sample paper"
