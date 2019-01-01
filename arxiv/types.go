@@ -37,5 +37,5 @@ type Author struct {
 }
 
 type Equation struct {
-	Text string
+	Text string `json:"name"`
 }
