@@ -1,0 +1,12 @@
+# this is sample file
+development:
+  db:
+    user: dev_user
+    password: dev_pass
+    name: dev_db
+
+production:
+  db:
+    user: pro_user
+    password: pro_pass
+    name: pro_db

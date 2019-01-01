@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/labstack/echo"
 	"github.com/raahii/arxiv-resources/arxiv"
+	"github.com/raahii/arxiv-resources/db"
 	"log"
 	"net/http"
 	"strconv"
@@ -78,6 +80,8 @@ func ShowPaper() echo.HandlerFunc {
 		}
 
 		// find the paper
+		db := db.GetConnection()
+		fmt.Printf("%v\n", db)
 		paper := Paper{}
 		paper.Id = int32(id)
 		paper.Title = "sample paper"

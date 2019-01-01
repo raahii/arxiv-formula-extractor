@@ -1,13 +1,30 @@
 package main
 
 import (
+	"flag"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/raahii/arxiv-resources/config"
 	"github.com/raahii/arxiv-resources/controller"
+	"github.com/raahii/arxiv-resources/db"
 )
 
+func setConfig() {
+	env := "development"
+	flag.Parse()
+	if args := flag.Args(); 0 < len(args) && args[0] == "pro" {
+		env = "production"
+	}
+	config.SetEnvironment(env)
+}
+
 func main() {
-	// instantiate echo waf
+	// read config and open database
+	setConfig()
+	db.Init()
+	defer db.GetConnection().Close()
+
+	// instantiate waf object
 	e := echo.New()
 
 	// middlewares
