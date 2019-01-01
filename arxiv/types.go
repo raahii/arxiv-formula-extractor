@@ -1,4 +1,4 @@
-package main
+package arxiv
 
 type Feed struct {
 	Link         Link    `xml:"href, attr"`
@@ -12,18 +12,18 @@ type Feed struct {
 }
 
 type Entry struct {
-	Id        string   `xml:"id"`
-	Updated   string   `xml:"updated"`
-	Published string   `xml:"published"`
-	Title     string   `xml:"title"`
-	Summary   string   `xml:"summary"`
-	Authors   []Author `xml:"author"`
-	Category  Category `xml:"category"`
-	Links     []Link   `xml:"link"`
+	Id        string   `xml:"id" json:"id"`
+	Updated   string   `xml:"updated" json:"updated"`
+	Published string   `xml:"published" json:"published"`
+	Title     string   `xml:"title" json:"title"`
+	Summary   string   `xml:"summary" json:"summary"`
+	Authors   []Author `xml:"author" json:"author"`
+	Category  Category `xml:"category" json:"category"`
+	Links     []Link   `xml:"link" json:"link"`
 }
 
 type Category struct {
-	Name string `xml:"term,attr"`
+	Name string `xml:"term,attr" json:"name"`
 }
 
 type Link struct {
@@ -37,5 +37,5 @@ type Author struct {
 }
 
 type Equation struct {
-	text string
+	Text string
 }

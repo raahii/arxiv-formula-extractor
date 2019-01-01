@@ -1,4 +1,4 @@
-package main
+package arxiv
 
 import (
 	"testing"
@@ -27,13 +27,27 @@ func TestFindEquations(t *testing.T) {
 	y=ax
 	\end{equation}
 	foobar
+	\begin{align}
+	y=ax
+	\end{align}
+	golang hogehoge
+	\begin{eqnarray}
+	y=ax
+	\end{eqnarray}
 	`
 
-	actual := FindEquations(input)[0]
+	actual := FindEquations(input)
+	e := Equation{`y=ax`}
+	expected := []Equation{e, e, e}
 
-	expected := Equation{`y=ax`}
-	if actual != expected {
-		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
+	if len(actual) != len(expected) {
+		t.Fatalf("number of elems is mismatch.\n\ngot %#v\nwant %#v", len(actual), len(expected))
+	}
+
+	for i := 0; i < len(actual); i++ {
+		if actual[i] != expected[i] {
+			t.Fatalf("%dth element\n\ngot  %#v\nwant %#v", i, actual[i], expected[i])
+		}
 	}
 }
 

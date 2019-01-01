@@ -1,4 +1,4 @@
-package main
+package arxiv
 
 import (
 	"fmt"
@@ -13,7 +13,6 @@ func RemoveComment(str string) string {
 	s := re.ReplaceAllString(str, ``)
 
 	return s
-
 }
 
 func RemoveTagLines(str string, tags []string) string {
@@ -42,12 +41,12 @@ func FindEquations(source string) []Equation {
 		return nil
 	}
 
-	r := regexp.MustCompile(`(?s)\\begin\{equation\}(.*?)\\end\{equation\}`)
+	r := regexp.MustCompile(`(?s)\\begin\{(equation|align|eqnarray)\}(.*?)\\end\{(equation|align|eqnarray)\}`)
 	m := r.FindAllStringSubmatch(source, -1)
 
 	equations := []Equation{}
 	for _, s := range m {
-		str := s[1]
+		str := s[2]
 		str = strings.TrimLeft(str, "\n\t")
 		str = strings.TrimRight(str, "\n\t")
 		equations = append(equations, Equation{str})
