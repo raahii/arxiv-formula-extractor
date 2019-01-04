@@ -8,29 +8,23 @@ import (
 	"github.com/raahii/arxiv-resources/config"
 	"github.com/raahii/arxiv-resources/controller"
 	"github.com/raahii/arxiv-resources/db"
+	"os"
 )
 
-func InitTables(db *gorm.DB) {
-
+func initApp(db *gorm.DB) {
 	// Create tables
-	if !db.HasTable(&controller.Paper{}) {
-		db.CreateTable(&controller.Paper{})
+	models := []interface{}{
+		&controller.Paper{},
+		&controller.Equation{},
+		&controller.Author{},
 	}
-	paper := controller.Paper{}
-	paper.Id = 1
-	paper.Title = "Sample Paper"
-	paper.Authors = "Mr.hogehoge"
-	paper.Version = 1
-	paper.Abstract = "Abstract here."
-	paper.Equations = []controller.Equation{
-		controller.Equation{1, "y=ax"},
-		controller.Equation{2, "F=ma"},
-	}
-	db.Create(&paper)
-	if !db.HasTable(&controller.Equation{}) {
-		db.CreateTable(&controller.Equation{})
+	for _, model := range models {
+		db.DropTableIfExists(model)
+		db.AutoMigrate(model)
 	}
 
+	// Create tarball dirs
+	os.Mkdir("tarballs", 0777)
 }
 
 func setConfig() {
@@ -47,7 +41,7 @@ func main() {
 	setConfig()
 	db.Init()
 	database := db.GetConnection()
-	InitTables(database)
+	initApp(database)
 	defer database.Close()
 
 	// instantiate waf object
@@ -62,7 +56,7 @@ func main() {
 	}))
 
 	// controller
-	e.GET("/papers", controller.SearchPapers())
+	e.GET("/papers", controller.FindPaperFromUrl())
 	e.GET("/papers/:id", controller.ShowPaper())
 
 	// start
