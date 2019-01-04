@@ -2,3 +2,6 @@
 
 config/environment.yml
 vendor
+
+tarballs/*
+!gitkeep
