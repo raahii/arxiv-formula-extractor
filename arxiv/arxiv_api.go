@@ -55,9 +55,6 @@ func SearchPapers(params map[string]string) Feed {
 	for k, v := range params {
 		q.Add(k, v)
 	}
-	// q.Add("sortBy", "lastUpdatedDate")
-	// q.Add("sortOrder", "ascending")
-	// q.Add("max_results", "5")
 	u.RawQuery = q.Encode()
 
 	// send the request

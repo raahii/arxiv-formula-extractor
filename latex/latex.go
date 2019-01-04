@@ -15,25 +15,12 @@ func RemoveComment(str string) string {
 	return s
 }
 
-func RemoveTagLines(str string, tags []string) string {
-	lines := strings.Split(str, "\n")
+func RemoveTags(str string, tags []string) string {
+	tagsStr := strings.Join(tags, "|")
+	pattern := fmt.Sprintf(`\\(%s)(\{.*\})?(\n)?`, tagsStr)
+	re := regexp.MustCompile(pattern)
 
-	var found bool
-	new_lines := []string{}
-	for _, line := range lines {
-		found = false
-		for _, tag := range tags {
-			if strings.Contains(line, tag) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			new_lines = append(new_lines, line)
-		}
-	}
-
-	return strings.Join(new_lines, "\n")
+	return re.ReplaceAllString(str, "")
 }
 
 func FindEquations(source string) []string {
@@ -41,16 +28,17 @@ func FindEquations(source string) []string {
 		return nil
 	}
 
-	pattern := `(?s)\\begin\{(equation|aligned|eqnarray)\}(.*?)\\end\{(equation|aligned|eqnarray)\}`
+	pattern := `(?s)\\begin\{(equation|align|aligned|eqnarray)\}(.*?)\\end\{(equation|align|aligned|eqnarray)\}`
 	re := regexp.MustCompile(pattern)
 	m := re.FindAllString(source, -1)
 
 	equations := []string{}
+	re = regexp.MustCompile("(equation|align|eqnarray)")
 	for _, str := range m {
-		str = strings.Replace(str, "{equation}", "{aligned}", -1)
+		str = re.ReplaceAllString(str, "aligned")
 		str = strings.TrimLeft(str, "\n\t")
 		str = strings.TrimRight(str, "\n\t")
-		str = RemoveTagLines(str, []string{`\label`})
+		str = RemoveTags(str, []string{"label", "nonumber"})
 		equations = append(equations, str)
 	}
 	return equations
@@ -67,6 +55,6 @@ func main() {
 
 	equations := FindEquations(latex_source)
 	for _, s := range equations {
-		fmt.Printf("%v\n", RemoveTagLines(s, []string{`\label`}))
+		fmt.Printf("%v\n", RemoveTags(s, []string{`\label`}))
 	}
 }

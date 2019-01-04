@@ -27,7 +27,7 @@ func readFile(path string) string {
 	return string(str)
 }
 
-func readAllSources(mainLatexPath string) string {
+func readAllSources(mainLatexPath string, basePath string) string {
 	// read all \input or \include tag and
 	// obtain all related sources concatenated string
 	source := readFile(mainLatexPath)
@@ -37,7 +37,7 @@ func readAllSources(mainLatexPath string) string {
 
 	resolveInputTag := func(s string) string {
 		path := re.FindStringSubmatch(s)[2]
-		_source := readFile(path)
+		_source := readFile(filepath.Join(basePath, path))
 		_source = latex.RemoveComment(_source)
 		return _source
 	}
@@ -55,7 +55,6 @@ func readAllSources(mainLatexPath string) string {
 
 func findMainSource(paths []string) string {
 	// search source which includes '\documentclass'
-
 	found := false
 	mainPath := ""
 	for _, path := range paths {
@@ -80,6 +79,7 @@ func extractArxivId(arxivUrl string) string {
 
 func (p *Paper) extractEquations(path string) {
 	// download tarball
+	log.Println("Downloading tarball", p.TarballUrl)
 	tarballPath := filepath.Join(path, p.ArxivId+".tar.gz")
 	// err := arxiv.DownloadTarball(p.TarballUrl, tarballPath)
 	// if err != nil {
@@ -88,18 +88,16 @@ func (p *Paper) extractEquations(path string) {
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, p.ArxivId)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(sourcePath, 0777)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	log.Println("Decompressing tarball", sourcePath)
+	os.Mkdir(sourcePath, 0777)
+
 	err := exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// list all *.tex
+	log.Println("Processing tex files")
 	pattern := filepath.Join(sourcePath, "**/*.tex")
 	files, err := zglob.Glob(pattern)
 	if err != nil {
@@ -110,9 +108,10 @@ func (p *Paper) extractEquations(path string) {
 	mainSource := findMainSource(files)
 
 	// obtain all latex source
-	allSource := readAllSources(mainSource)
+	allSource := readAllSources(mainSource, sourcePath)
 
 	// obtain equations
+	log.Println("Extracting equations")
 	equationStrs := latex.FindEquations(allSource)
 	equations := []Equation{}
 	for _, str := range equationStrs {

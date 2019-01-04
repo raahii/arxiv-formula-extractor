@@ -29,8 +29,8 @@ func (Paper) TableName() string {
 
 type Author struct {
 	Model
-	Name    string `json:name gorm:not null`
-	PaperID uint   `json:paper_id gorm:"not null"`
+	Name    string `json:"name" gorm:not null`
+	PaperID uint   `json:"paper_id" gorm:"not null"`
 }
 
 func (Author) TableName() string {
