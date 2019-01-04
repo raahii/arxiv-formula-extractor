@@ -19,7 +19,6 @@ import (
 )
 
 func readFile(path string) string {
-	fmt.Println("\treading %s", path)
 	str, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
@@ -106,7 +105,6 @@ func (p *Paper) extractEquations(path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%#v\n", files)
 
 	// find main latex source
 	mainSource := findMainSource(files)

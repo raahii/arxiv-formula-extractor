@@ -41,12 +41,13 @@ func FindEquations(source string) []string {
 		return nil
 	}
 
-	r := regexp.MustCompile(`(?s)\\begin\{(equation|align|eqnarray)\}(.*?)\\end\{(equation|align|eqnarray)\}`)
-	m := r.FindAllStringSubmatch(source, -1)
+	pattern := `(?s)\\begin\{(equation|aligned|eqnarray)\}(.*?)\\end\{(equation|aligned|eqnarray)\}`
+	re := regexp.MustCompile(pattern)
+	m := re.FindAllString(source, -1)
 
 	equations := []string{}
-	for _, s := range m {
-		str := s[2]
+	for _, str := range m {
+		str = strings.Replace(str, "{equation}", "{aligned}", -1)
 		str = strings.TrimLeft(str, "\n\t")
 		str = strings.TrimRight(str, "\n\t")
 		str = RemoveTagLines(str, []string{`\label`})

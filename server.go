@@ -19,7 +19,7 @@ func initApp(db *gorm.DB) {
 		&controller.Author{},
 	}
 	for _, model := range models {
-		db.DropTableIfExists(model)
+		// db.DropTableIfExists(model)
 		db.AutoMigrate(model)
 	}
 
