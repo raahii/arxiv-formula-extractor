@@ -18,7 +18,11 @@ export default {
   props: ['macroString'],
   computed: {
     macroExp: function () {
-      return "\(" + this.macroString + "\)"
+      let exp
+      exp  = String.raw`\(` + "\n"
+      exp += this.macroString
+      exp += "\n" + String.raw`\)`
+      return exp
     }
   }
 }

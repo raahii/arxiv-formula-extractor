@@ -83,13 +83,14 @@ func extractArxivId(arxivUrl string) string {
 
 func (paper *Paper) readLatexSource(path string) {
 	var err error
+
 	// download tarball
 	log.Println("Downloading tarball", paper.TarballUrl)
 	tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
-	// err := arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, paper.ArxivId)
@@ -116,6 +117,7 @@ func (paper *Paper) readLatexSource(path string) {
 	allSource := readAllSources(rootFile, sourcePath)
 
 	// obtain macros
+	log.Println("Extracting macros")
 	macros := latex.FindMacros(allSource)
 	paper.Macros = strings.Join(macros, "\n")
 
@@ -202,10 +204,13 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			}
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
-			tarballDir := "tarballs"
-			paper.readLatexSource(tarballDir)
-			fmt.Println(paper.Macros)
 		}
+
+		// add macro to process fine for unsupported command in mathjax
+		defaultMacros := []string{
+			`\newcommand{\bm}[1]{\boldsymbol #1}`,
+		}
+		paper.Macros += "\n" + strings.Join(defaultMacros, "\n")
 
 		response := map[string]interface{}{
 			"paper": paper,

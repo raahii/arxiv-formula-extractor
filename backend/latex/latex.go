@@ -36,12 +36,10 @@ func FindMacros(source string) []string {
 	}
 
 	pattern := fmt.Sprintf(`(\%s)`, strings.Join(tags, `|\`)) + `\*?{.*`
-	fmt.Println(pattern)
 	re := regexp.MustCompile(pattern)
 	matchStrs := re.FindAllString(source, -1)
 
 	for i := 0; i < len(matchStrs); i++ {
-		fmt.Printf(string(i))
 		for _, tag := range tags {
 			if strings.Contains(matchStrs[i], tag+"*{") {
 				matchStrs[i] = strings.Replace(matchStrs[i], tag+"*{", tag+"{", 1)
@@ -61,16 +59,15 @@ func FindEquations(source string) []string {
 	// TODO: change not to use regular expressions
 	pattern := `(?s)\\begin\{(equation|align|aligned|eqnarray)\}(.*?)\\end\{(equation|align|aligned|eqnarray)\}`
 	re := regexp.MustCompile(pattern)
-	m := re.FindAllString(source, -1)
+	m := re.FindAllStringSubmatch(source, -1)
 
 	equations := []string{}
-	re = regexp.MustCompile("(equation|align|eqnarray)")
-	for _, str := range m {
-		str = re.ReplaceAllString(str, "aligned")
-		str = strings.TrimLeft(str, "\n\t")
-		str = strings.TrimRight(str, "\n\t")
-		str = RemoveTags(str, []string{"label", "nonumber"})
-		equations = append(equations, str)
+	for _, strs := range m {
+		eq := strs[2]
+		eq = strings.TrimLeft(eq, "\n\t")
+		eq = strings.TrimRight(eq, "\n\t")
+		eq = RemoveTags(eq, []string{"label", "nonumber"})
+		equations = append(equations, eq)
 	}
 	return equations
 }

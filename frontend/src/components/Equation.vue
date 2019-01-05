@@ -1,12 +1,12 @@
 <template>
   <div class="equation">
     <div class='col'>
-      <vue-mathjax class="expression" :formula="obj.expression"></vue-mathjax>
+      <vue-mathjax class="expression" :formula="mathExp"></vue-mathjax>
     </div>
     <div class='col' id="copy_button">
       <button type="button"
               class='copy_equation'
-              v-clipboard:copy="obj.expression"
+              v-clipboard:copy="obj.body"
               v-clipboard:success="onCopy"
               v-clipboard:error="onError">Copy
       </button>
@@ -24,7 +24,7 @@ export default {
   },
   props: ['obj'],
   mounted: function () {
-    console.info(this.obj.expression)
+    console.info(this.mathExp)
   },
   methods: {
     onCopy: function (e) {
@@ -33,6 +33,15 @@ export default {
     onError: function (e) {
       console.info('Failed to copy texts')
     }
+  },
+  computed: {
+    mathExp: function () {
+      let exp;
+      exp  = String.raw`\begin{eqnarray}`
+      exp += this.obj.expression
+      exp += String.raw`\end{eqnarray}`
+      return exp
+    },
   }
 }
 </script>
