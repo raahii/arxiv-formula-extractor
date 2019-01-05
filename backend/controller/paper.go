@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/labstack/echo"
 	"github.com/mattn/go-zglob"
-	"github.com/raahii/arxiv-resources/arxiv"
-	"github.com/raahii/arxiv-resources/db"
-	"github.com/raahii/arxiv-resources/latex"
+	"github.com/raahii/arxiv-equations/backend/arxiv"
+	"github.com/raahii/arxiv-equations/backend/db"
+	"github.com/raahii/arxiv-equations/backend/latex"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -81,10 +81,10 @@ func (p *Paper) extractEquations(path string) {
 	// download tarball
 	log.Println("Downloading tarball", p.TarballUrl)
 	tarballPath := filepath.Join(path, p.ArxivId+".tar.gz")
-	// err := arxiv.DownloadTarball(p.TarballUrl, tarballPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err := arxiv.DownloadTarball(p.TarballUrl, tarballPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, p.ArxivId)

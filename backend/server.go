@@ -5,9 +5,9 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/raahii/arxiv-resources/config"
-	"github.com/raahii/arxiv-resources/controller"
-	"github.com/raahii/arxiv-resources/db"
+	"github.com/raahii/arxiv-equations/backend/config"
+	"github.com/raahii/arxiv-equations/backend/controller"
+	"github.com/raahii/arxiv-equations/backend/db"
 	"os"
 )
 
