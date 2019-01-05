@@ -36,7 +36,11 @@ func readAllSources(mainLatexPath string, basePath string) string {
 	re := regexp.MustCompile(`\\(input|include)\{(.*?)\}`)
 
 	resolveInputTag := func(s string) string {
+		fmt.Println("%v", re.FindStringSubmatch(s))
 		path := re.FindStringSubmatch(s)[2]
+		if filepath.Ext(path) == "" {
+			path = path + ".tex"
+		}
 		_source := readFile(filepath.Join(basePath, path))
 		_source = latex.RemoveComment(_source)
 		return _source
@@ -91,7 +95,7 @@ func (p *Paper) extractEquations(path string) {
 	log.Println("Decompressing tarball", sourcePath)
 	os.Mkdir(sourcePath, 0777)
 
-	err := exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
+	err = exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
 	if err != nil {
 		log.Fatal(err)
 	}
