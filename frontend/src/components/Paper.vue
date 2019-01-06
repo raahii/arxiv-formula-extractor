@@ -7,7 +7,7 @@
       <li>"{{ obj.authors }}</li>
     </div>
     <div id="paper_equations">
-      <macro :obj="exampleMacro"></macro>
+      <macro :macroString="obj.macros"></macro>
       <equation :obj="eq" :key="eq.arxiv_id" v-for="eq in obj.equations" ></equation>
     </div>
   </div>
@@ -28,7 +28,6 @@ export default {
     return {
       exampleMacro: {
         expression: "\\newcommand{\\bfrac}[2]{\\genfrac{[}{]}{0pt}{}{#1}{#2}}"
-        // expression: "\\newcommand{\\JK}[1]{}\n\\newcommand{\\JK}[1]{{\\bf \\textcolor{red}{Jan: #1}}}"
       },
     }
   },

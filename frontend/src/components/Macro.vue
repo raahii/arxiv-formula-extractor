@@ -13,12 +13,12 @@ export default {
    'vue-mathjax': VueMathjax
   },
   mounted: function () {
-    console.info(this.macroExp)
+    console.info("macro:", this.macroExp)
   },
-  props: ['obj'],
+  props: ['macroString'],
   computed: {
     macroExp: function () {
-      return "\(" + this.obj.expression + "\)"
+      return "\(" + this.macroString + "\)"
     }
   }
 }
