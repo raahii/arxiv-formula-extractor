@@ -1,6 +1,8 @@
 <template>
   <div class="equation">
-    <katex class='katex col' v-bind:name="obj.id">{{ obj.expression }}</katex>
+    <div class='col'>
+      <vue-mathjax class="expression" :formula="obj.expression"></vue-mathjax>
+    </div>
     <div class='col' id="copy_button">
       <button type="button"
               class='copy_equation'
@@ -13,15 +15,16 @@
 </template>
 
 <script>
-import Katex from './Katex.vue'
+import { VueMathjax } from 'vue-mathjax'
 
 export default {
   name: 'Paper',
   components: {
-    Katex
+   'vue-mathjax': VueMathjax
   },
   props: ['obj'],
   mounted: function () {
+    console.info(this.obj.expression)
   },
   methods: {
     onCopy: function (e) {
@@ -46,7 +49,7 @@ export default {
     margin-left: 20px;
   }
   
-  .katex {
+  .expression {
     flex: 3; 
   }
   

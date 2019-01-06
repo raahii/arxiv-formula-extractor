@@ -6,30 +6,32 @@
     <div id="paper_authors">
       <li>"{{ obj.authors }}</li>
     </div>
-    <div id="paper_equations" v-for="eq in obj.equations">
-      <equation v-bind:obj="eq"></equation>
+    <div id="paper_equations">
+      <macro :obj="exampleMacro"></macro>
+      <equation :obj="eq" :key="eq.arxiv_id" v-for="eq in obj.equations" ></equation>
     </div>
   </div>
 </template>
 
 <script>
 import Equation from './Equation.vue'
+import Macro from './Macro.vue'
 
 export default {
   name: 'Paper',
   components: {
-    Equation
+    "equation": Equation,
+    "macro": Macro,
   },
   props: ['obj'],
   data () {
     return {
+      exampleMacro: {
+        expression: "\\newcommand{\\bfrac}[2]{\\genfrac{[}{]}{0pt}{}{#1}{#2}}"
+        // expression: "\\newcommand{\\JK}[1]{}\n\\newcommand{\\JK}[1]{{\\bf \\textcolor{red}{Jan: #1}}}"
+      },
     }
   },
-  mounted: function () {
-    console.log(this.obj.equations)
-  },
-  methods: {
-  }
 }
 </script>
 
