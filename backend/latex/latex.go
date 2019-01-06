@@ -9,10 +9,26 @@ import (
 )
 
 func RemoveComment(str string) string {
-	var re = regexp.MustCompile("%.*")
-	s := re.ReplaceAllString(str, ``)
+	newStr := make([]rune, 0, len([]rune(str)))
+	percent := rune('%')
+	newline := rune('\n')
 
-	return s
+	valid := true
+	for _, c := range str {
+		if c == percent {
+			valid = false
+		}
+
+		if c == newline {
+			valid = true
+		}
+
+		if valid {
+			newStr = append(newStr, c)
+		}
+	}
+
+	return string(newStr)
 }
 
 func RemoveTags(str string, tags []string) string {

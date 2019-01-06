@@ -4,17 +4,24 @@ import (
 	"testing"
 )
 
-func TestRemoveTags(t *testing.T) {
-	input := `\begin{equation}
-	\label{eq:minimaxgame-definition}
+func TestRemoveComment(t *testing.T) {
+	input := `%hogehoge
+		% fugafuga
+	\begin{equation}
 	y=ax
-	\end{equation}`
+	\end{equation}
+	foo % bar
+	`
 
-	actual := RemoveTagLines(input, []string{`\label`})
+	actual := RemoveComment(input)
 
-	expected := `\begin{equation}
+	expected := `
+		
+	\begin{equation}
 	y=ax
-	\end{equation}`
+	\end{equation}
+	foo 
+	`
 	if actual != expected {
 		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
 	}
@@ -48,28 +55,5 @@ func TestFindEquations(t *testing.T) {
 		if actual[i] != expected[i] {
 			t.Fatalf("%dth element\n\ngot  %#v\nwant %#v", i, actual[i], expected[i])
 		}
-	}
-}
-
-func TestRemoveComment(t *testing.T) {
-	input := `%hogehoge
-		% fugafuga
-	\begin{equation}
-	y=ax
-	\end{equation}
-	foo % bar
-	`
-
-	actual := RemoveComment(input)
-
-	expected := `
-		
-	\begin{equation}
-	y=ax
-	\end{equation}
-	foo 
-	`
-	if actual != expected {
-		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
 	}
 }
