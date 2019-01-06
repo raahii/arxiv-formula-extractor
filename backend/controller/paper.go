@@ -2,11 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/labstack/echo"
-	"github.com/mattn/go-zglob"
-	"github.com/raahii/arxiv-equations/backend/arxiv"
-	"github.com/raahii/arxiv-equations/backend/db"
-	"github.com/raahii/arxiv-equations/backend/latex"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,6 +11,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/labstack/echo"
+	zglob "github.com/mattn/go-zglob"
+	"github.com/raahii/arxiv-equations/backend/arxiv"
+	"github.com/raahii/arxiv-equations/backend/db"
+	"github.com/raahii/arxiv-equations/backend/latex"
 )
 
 func readFile(path string) string {
@@ -36,7 +37,6 @@ func readAllSources(mainLatexPath string, basePath string) string {
 	re := regexp.MustCompile(`\\(input|include)\{(.*?)\}`)
 
 	resolveInputTag := func(s string) string {
-		fmt.Println("%v", re.FindStringSubmatch(s))
 		path := re.FindStringSubmatch(s)[2]
 		if filepath.Ext(path) == "" {
 			path = path + ".tex"
@@ -57,7 +57,7 @@ func readAllSources(mainLatexPath string, basePath string) string {
 	return source
 }
 
-func findMainSource(paths []string) string {
+func findSourceRoot(paths []string) string {
 	// search source which includes '\documentclass'
 	found := false
 	mainPath := ""
@@ -81,17 +81,18 @@ func extractArxivId(arxivUrl string) string {
 	return strs[len(strs)-1]
 }
 
-func (p *Paper) extractEquations(path string) {
+func (paper *Paper) readLatexSource(path string) {
+	var err error
 	// download tarball
-	log.Println("Downloading tarball", p.TarballUrl)
-	tarballPath := filepath.Join(path, p.ArxivId+".tar.gz")
-	err := arxiv.DownloadTarball(p.TarballUrl, tarballPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Println("Downloading tarball", paper.TarballUrl)
+	tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
+	// err := arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// decompress tarball
-	sourcePath := filepath.Join(path, p.ArxivId)
+	sourcePath := filepath.Join(path, paper.ArxivId)
 	log.Println("Decompressing tarball", sourcePath)
 	os.Mkdir(sourcePath, 0777)
 
@@ -108,11 +109,15 @@ func (p *Paper) extractEquations(path string) {
 		log.Fatal(err)
 	}
 
-	// find main latex source
-	mainSource := findMainSource(files)
+	// find root latex source file
+	rootFile := findSourceRoot(files)
 
 	// obtain all latex source
-	allSource := readAllSources(mainSource, sourcePath)
+	allSource := readAllSources(rootFile, sourcePath)
+
+	// obtain macros
+	macros := latex.FindMacros(allSource)
+	paper.Macros = strings.Join(macros, "\n")
 
 	// obtain equations
 	log.Println("Extracting equations")
@@ -123,7 +128,7 @@ func (p *Paper) extractEquations(path string) {
 		eq.Expression = str
 		equations = append(equations, eq)
 	}
-	p.Equations = equations
+	paper.Equations = equations
 }
 
 func FetchPaper(arxivId string) Paper {
@@ -188,15 +193,18 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			// fetch the paper
 			paper = FetchPaper(arxivId)
 
-			// extract equations
+			// extract macros and equations
 			tarballDir := "tarballs"
-			paper.extractEquations(tarballDir)
+			paper.readLatexSource(tarballDir)
 
 			if dbc := database.Create(&paper); dbc.Error != nil {
 				log.Fatal(dbc.Error)
 			}
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
+			tarballDir := "tarballs"
+			paper.readLatexSource(tarballDir)
+			fmt.Println(paper.Macros)
 		}
 
 		response := map[string]interface{}{

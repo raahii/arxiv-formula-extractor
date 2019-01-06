@@ -23,11 +23,42 @@ func RemoveTags(str string, tags []string) string {
 	return re.ReplaceAllString(str, "")
 }
 
+func FindMacros(source string) []string {
+	// read tags bellow:
+	// \def, \newcommand, \renewcommand,
+	// \newenvironment, \renewenvironment
+	tags := []string{
+		`\def`,
+		`\newcommand`,
+		`\renewcommand`,
+		`\newenvironment`,
+		`\renewenvironment`,
+	}
+
+	pattern := fmt.Sprintf(`(\%s)`, strings.Join(tags, `|\`)) + `\*?{.*`
+	fmt.Println(pattern)
+	re := regexp.MustCompile(pattern)
+	matchStrs := re.FindAllString(source, -1)
+
+	for i := 0; i < len(matchStrs); i++ {
+		fmt.Printf(string(i))
+		for _, tag := range tags {
+			if strings.Contains(matchStrs[i], tag+"*{") {
+				matchStrs[i] = strings.Replace(matchStrs[i], tag+"*{", tag+"{", 1)
+				break
+			}
+		}
+	}
+
+	return matchStrs
+}
+
 func FindEquations(source string) []string {
 	if !strings.Contains(source, "{equation}") {
 		return nil
 	}
 
+	// TODO: change not to use regular expressions
 	pattern := `(?s)\\begin\{(equation|align|aligned|eqnarray)\}(.*?)\\end\{(equation|align|aligned|eqnarray)\}`
 	re := regexp.MustCompile(pattern)
 	m := re.FindAllString(source, -1)

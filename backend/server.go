@@ -2,13 +2,14 @@ package main
 
 import (
 	"flag"
+	"os"
+
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/raahii/arxiv-equations/backend/config"
 	"github.com/raahii/arxiv-equations/backend/controller"
 	"github.com/raahii/arxiv-equations/backend/db"
-	"os"
 )
 
 func initApp(db *gorm.DB) {
