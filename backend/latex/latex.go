@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+func contains(s []string, e string) bool {
+	for _, v := range s {
+		if e == v {
+			return true
+		}
+	}
+	return false
+}
+
 func RemoveComment(str string) string {
 	newStr := make([]rune, 0, len([]rune(str)))
 	percent := rune('%')
@@ -39,32 +48,102 @@ func RemoveTags(str string, tags []string) string {
 	return re.ReplaceAllString(str, "")
 }
 
-func FindMacros(source string) []string {
-	// read tags bellow:
-	// \def, \newcommand, \renewcommand,
-	// \newenvironment, \renewenvironment
-	tags := []string{
-		`\def`,
-		`\newcommand`,
-		`\renewcommand`,
-		`\newenvironment`,
-		`\renewenvironment`,
+func FindCommandEnd(str string, command string) (int, error) {
+	cond := fmt.Sprintf("\nstr:\n'%s'\n command:\n'%s'", str, command)
+	if str[:len(command)] != command {
+		return -1, fmt.Errorf("Passed str is not started command!" + cond)
 	}
 
-	pattern := fmt.Sprintf(`(\%s)`, strings.Join(tags, `|\`)) + `\*?{.*`
-	re := regexp.MustCompile(pattern)
-	matchStrs := re.FindAllString(source, -1)
+	ignore := false
+	nBraces := 0
+	for i, c := range str {
+		if c != rune('{') && c != rune('}') {
+			continue
+		}
 
-	for i := 0; i < len(matchStrs); i++ {
-		for _, tag := range tags {
-			if strings.Contains(matchStrs[i], tag+"*{") {
-				matchStrs[i] = strings.Replace(matchStrs[i], tag+"*{", tag+"{", 1)
-				break
+		if c == rune('{') {
+			if i == len(command) {
+				// first brace
+				ignore = true
+			} else {
+				nBraces++
+			}
+			continue
+		}
+
+		if c == rune('}') {
+			if ignore {
+				ignore = false
+				continue
+			}
+
+			nBraces--
+			if nBraces > 0 {
+				continue
+			} else if nBraces == 0 {
+				return i + 1, nil // success
+			} else {
+				return -1, fmt.Errorf("Number of braces is mismatch! } is too much!" + cond)
 			}
 		}
 	}
 
-	return matchStrs
+	if nBraces > 0 {
+		return -1, fmt.Errorf("Number of braces is mismatch! { is too much!" + cond)
+	} else {
+		return -1, fmt.Errorf("Brace is not found" + cond)
+	}
+
+}
+
+func FindMacros(str string) ([]string, error) {
+	// read command bellow:
+	// \def, \newcommand, \renewcommand,
+	commands := []string{
+		`\def`,
+		`\newcommand`,
+		`\renewcommand`,
+	}
+	followChars := []string{
+		`{`,
+		`*`,
+		`\`,
+	}
+
+	macros := []string{}
+	for {
+		if len(str) == 0 {
+			break
+		}
+
+		command := ""
+		startIndex := len(str)
+		for _, _command := range commands {
+			for _, followChar := range followChars {
+				if _pos := strings.Index(str, _command+followChar); _pos != -1 {
+					if _pos < startIndex {
+						startIndex = _pos
+						command = _command
+					}
+				}
+			}
+		}
+
+		if command == "" {
+			// str includes no command anymore
+			break
+		}
+
+		endIndex, err := FindCommandEnd(str[startIndex:], command)
+		if err != nil {
+			return macros, err
+		}
+		log.Println(str[startIndex : startIndex+endIndex])
+		macros = append(macros, str[startIndex:startIndex+endIndex])
+		str = str[startIndex+endIndex:]
+	}
+
+	return macros, nil
 }
 
 func FindEquations(source string) []string {

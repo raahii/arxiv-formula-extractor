@@ -19,9 +19,9 @@ export default {
   computed: {
     macroExp: function () {
       let exp
-      exp  = String.raw`\(` + "\n"
+      exp  = String.raw`\\(` + "\n"
       exp += this.macroString
-      exp += "\n" + String.raw`\)`
+      exp += "\n" + String.raw`\\)`
       return exp
     }
   }

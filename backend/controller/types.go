@@ -20,7 +20,7 @@ type Paper struct {
 	Abstract   string     `json:"abstract" gorm:"not null;type:text"`
 	AbsUrl     string     `json:"url" gorm:"not null"`
 	TarballUrl string     `json:"tarball_url" gorm:"not null"`
-	Macros     string     `json:"macros" gorm:"type:varchar(10000)"`
+	Macros     string     `json:"macros" gorm:"type:text"`
 	Equations  []Equation `json:"equations" gorm:"association_save_reference:true;foreignkey:PaperID"`
 }
 
