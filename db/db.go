@@ -5,7 +5,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/raahii/arxiv-equations/backend/config"
+	"github.com/raahii/arxiv-equations/config"
 )
 
 var db *gorm.DB

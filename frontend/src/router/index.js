@@ -11,10 +11,5 @@ export default new Router({
       name: 'TopPage',
       component: TopPage
     },
-    {
-      path: '/papers/:arxiv_id',
-      name: 'TopPage',
-      component: TopPage
-    },
   ]
 })

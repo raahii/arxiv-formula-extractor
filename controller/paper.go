@@ -14,10 +14,10 @@ import (
 
 	"github.com/labstack/echo"
 	zglob "github.com/mattn/go-zglob"
-	"github.com/raahii/arxiv-equations/backend/arxiv"
-	"github.com/raahii/arxiv-equations/backend/config"
-	"github.com/raahii/arxiv-equations/backend/db"
-	"github.com/raahii/arxiv-equations/backend/latex"
+	"github.com/raahii/arxiv-equations/arxiv"
+	"github.com/raahii/arxiv-equations/config"
+	"github.com/raahii/arxiv-equations/db"
+	"github.com/raahii/arxiv-equations/latex"
 )
 
 func readFile(path string) string {

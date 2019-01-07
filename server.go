@@ -8,9 +8,9 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/raahii/arxiv-equations/backend/config"
-	"github.com/raahii/arxiv-equations/backend/controller"
-	"github.com/raahii/arxiv-equations/backend/db"
+	"github.com/raahii/arxiv-equations/config"
+	"github.com/raahii/arxiv-equations/controller"
+	"github.com/raahii/arxiv-equations/db"
 )
 
 func initApp(db *gorm.DB) {

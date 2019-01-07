@@ -1,7 +1,6 @@
 package controller
 
 import (
-	// "github.com/jinzhu/gorm"
 	"time"
 )
 
