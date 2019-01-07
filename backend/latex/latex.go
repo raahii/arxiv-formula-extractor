@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func contains(s []string, e string) bool {
+func FindNewline(s []string, e string) bool {
 	for _, v := range s {
 		if e == v {
 			return true
@@ -103,6 +103,7 @@ func FindMacros(str string) ([]string, error) {
 		`\def`,
 		`\newcommand`,
 		`\renewcommand`,
+		`\DeclareMathOperator`,
 	}
 	followChars := []string{
 		`{`,
@@ -195,14 +196,26 @@ func FindEquations(str string) ([]string, error) {
 
 		// check nested command exists
 		equation := str[:endIndex]
+		var s, e int
 		for _, command := range commands {
 			if !strings.Contains(equation, command) {
 				continue
 			}
-			startCommand := fmt.Sprintf("\\begin{%s}", command)
-			endCommand := fmt.Sprintf("\\end{%s}", command)
-			equation = strings.Replace(equation, startCommand, "", -1)
-			equation = strings.Replace(equation, endCommand, "", -1)
+			// remove command start
+			startCommand := fmt.Sprintf("\\begin{%s", command)
+			s = strings.Index(equation, startCommand)
+			e = s + strings.Index(equation[s:], "\n")
+			equation = equation[:s] + equation[e:]
+
+			// remove command end
+			endCommand := fmt.Sprintf("\\end{%s", command)
+			s = strings.Index(equation, endCommand)
+			e = s + strings.Index(equation[s:], "\n")
+			if e == -1 {
+				equation = equation[:s]
+			} else {
+				equation = equation[:s] + equation[e:]
+			}
 		}
 		equation = strings.Trim(equation, "\n\t ")
 		equations = append(equations, equation)

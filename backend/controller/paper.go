@@ -33,6 +33,8 @@ func readAllSources(mainLatexPath string, basePath string) string {
 	// obtain all related sources concatenated string
 	source := readFile(mainLatexPath)
 	source = latex.RemoveComment(source)
+	source = strings.Replace(source, "*{", "{", -1)
+	source = strings.Replace(source, "*}", "}", -1)
 
 	re := regexp.MustCompile(`\\(input|include)\{(.*?)\}`)
 
