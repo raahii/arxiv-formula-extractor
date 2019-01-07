@@ -44,6 +44,7 @@ func TestFindMacros(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	expected := []string{
 		`\def{\bmphi}{{\bm \phi}}`,
 		`\newcommand{\bmphi}{{\bm \phi}}`,
@@ -75,6 +76,9 @@ func TestFindEquations(t *testing.T) {
 	\begin{equation}
 	y=ax
 	\end{equation}
+	\begin{equation*}
+	y=ax
+	\end{equation*}
 	foobar
 	\begin{align}
 	y=ax
@@ -83,19 +87,31 @@ func TestFindEquations(t *testing.T) {
 	\begin{eqnarray}
 	y=ax
 	\end{eqnarray}
+	\begin{eqnarray}
+	\begin{align}
+	y=ax
+	\end{align}
+	\end{eqnarray}
 	`
 
-	actual := FindEquations(input)
+	actual, err := FindEquations(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	e := `y=ax`
-	expected := []string{e, e, e}
+	expected := []string{e, e, e, e, e}
 
 	if len(actual) != len(expected) {
-		t.Fatalf("number of elems is mismatch.\n\ngot %#v\nwant %#v", len(actual), len(expected))
+		msg := "number of elements is mismatch!\n\n"
+		msg += fmt.Sprintf("got %d elements\nwant %d elements\n\n", len(actual), len(expected))
+		msg += fmt.Sprintf("got %#v\nwant %#v\n\n", actual, expected)
+		t.Fatalf(msg)
 	}
 
 	for i := 0; i < len(actual); i++ {
 		if actual[i] != expected[i] {
-			t.Fatalf("%dth element\n\ngot  %#v\nwant %#v", i, actual[i], expected[i])
+			t.Fatalf("%dth element is mismatch!\n\ngot  %#v\nwant %#v", i, actual[i], expected[i])
 		}
 	}
 }

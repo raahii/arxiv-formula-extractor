@@ -87,10 +87,10 @@ func (paper *Paper) readLatexSource(path string) {
 	// download tarball
 	log.Println("Downloading tarball", paper.TarballUrl)
 	tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
-	// err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, paper.ArxivId)
@@ -126,7 +126,10 @@ func (paper *Paper) readLatexSource(path string) {
 
 	// obtain equations
 	log.Println("Extracting equations")
-	equationStrs := latex.FindEquations(allSource)
+	equationStrs, err := latex.FindEquations(allSource)
+	if err != nil {
+		log.Fatal(err)
+	}
 	equations := []Equation{}
 	for _, str := range equationStrs {
 		eq := Equation{}
@@ -207,8 +210,8 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			}
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
-			tarballDir := "tarballs"
-			paper.readLatexSource(tarballDir)
+			// tarballDir := "tarballs"
+			// paper.readLatexSource(tarballDir)
 		}
 
 		// add macro to process fine for unsupported command in mathjax

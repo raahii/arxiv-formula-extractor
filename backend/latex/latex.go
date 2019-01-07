@@ -48,7 +48,7 @@ func RemoveTags(str string, tags []string) string {
 	return re.ReplaceAllString(str, "")
 }
 
-func FindCommandEnd(str string, command string) (int, error) {
+func FindMacroCommandEnd(str string, command string) (int, error) {
 	cond := fmt.Sprintf("\nstr:\n'%s'\n command:\n'%s'", str, command)
 	if str[:len(command)] != command {
 		return -1, fmt.Errorf("Passed str is not started command!" + cond)
@@ -134,11 +134,10 @@ func FindMacros(str string) ([]string, error) {
 			break
 		}
 
-		endIndex, err := FindCommandEnd(str[startIndex:], command)
+		endIndex, err := FindMacroCommandEnd(str[startIndex:], command)
 		if err != nil {
 			return macros, err
 		}
-		log.Println(str[startIndex : startIndex+endIndex])
 		macros = append(macros, str[startIndex:startIndex+endIndex])
 		str = str[startIndex+endIndex:]
 	}
@@ -146,25 +145,70 @@ func FindMacros(str string) ([]string, error) {
 	return macros, nil
 }
 
-func FindEquations(source string) []string {
-	if !strings.Contains(source, "{equation}") {
-		return nil
+func FindEquations(str string) ([]string, error) {
+	commands := []string{
+		`equation`,
+		`align`,
+		`aligned`,
+		`eqnarray`,
 	}
-
-	// TODO: change not to use regular expressions
-	pattern := `(?s)\\begin\{(equation|align|aligned|eqnarray)\}(.*?)\\end\{(equation|align|aligned|eqnarray)\}`
-	re := regexp.MustCompile(pattern)
-	m := re.FindAllStringSubmatch(source, -1)
 
 	equations := []string{}
-	for _, strs := range m {
-		eq := strs[2]
-		eq = strings.TrimLeft(eq, "\n\t")
-		eq = strings.TrimRight(eq, "\n\t")
-		eq = RemoveTags(eq, []string{"label", "nonumber"})
-		equations = append(equations, eq)
+	for {
+		command := ""
+		startIndex := len(str)
+		for _, _command := range commands {
+			commandStart := fmt.Sprintf("\\begin{%s", _command)
+			if _pos := strings.Index(str, commandStart); _pos != -1 {
+				if _pos < startIndex {
+					startIndex = _pos
+					command = _command
+				}
+			}
+		}
+
+		if command == "" {
+			// str includes no command anymore
+			break
+		}
+
+		// find end of command opening
+		flag := false
+		for i, c := range str[startIndex:] {
+			if flag {
+				startIndex += i
+				break
+			}
+			if c == rune('\n') {
+				flag = true
+			}
+		}
+		str = str[startIndex:]
+
+		// find end of command closing
+		commandEnd := fmt.Sprintf("\\end{%s", command)
+		endIndex := strings.Index(str, commandEnd)
+		if endIndex == -1 {
+			return nil, fmt.Errorf("Corresponding end command is not found!, %s", command)
+		}
+
+		// check nested command exists
+		equation := str[:endIndex]
+		for _, command := range commands {
+			if !strings.Contains(equation, command) {
+				continue
+			}
+			startCommand := fmt.Sprintf("\\begin{%s}", command)
+			endCommand := fmt.Sprintf("\\end{%s}", command)
+			equation = strings.Replace(equation, startCommand, "", -1)
+			equation = strings.Replace(equation, endCommand, "", -1)
+		}
+		equation = strings.Trim(equation, "\n\t ")
+		equations = append(equations, equation)
+		str = str[endIndex:]
 	}
-	return equations
+
+	return equations, nil
 }
 
 func main() {
@@ -176,7 +220,11 @@ func main() {
 	latex_source := string(data)
 	latex_source = RemoveComment(latex_source)
 
-	equations := FindEquations(latex_source)
+	equations, err := FindEquations(latex_source)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, s := range equations {
 		fmt.Printf("%v\n", RemoveTags(s, []string{`\label`}))
 	}
