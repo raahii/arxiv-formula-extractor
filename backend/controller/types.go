@@ -41,7 +41,6 @@ func (Author) TableName() string {
 type Equation struct {
 	Model
 	Expression string `json:"expression" gorm:"not null;type:varchar(10000)"`
-	Body       string `json:"body" gorm:"not null;type:varchar(10000)"`
 	PaperID    uint   `json:"paper_id" gorm:"not null"`
 }
 

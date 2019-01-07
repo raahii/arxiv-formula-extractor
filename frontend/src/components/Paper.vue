@@ -1,12 +1,13 @@
 <template>
   <div class="paper">
-    <div id="paper_title">
-      <li>"{{ obj.title }}"</li>
+    <div class="paper_title">
+      {{ obj.title }}
     </div>
-    <div id="paper_authors">
-      <li>"{{ obj.authors }}</li>
+    <div class="paper_authors">
+      {{ this.authorsStr }}
     </div>
-    <div id="paper_equations">
+    <div class="paper_equations">
+      <p class="n_hits"> {{ this.obj.equations.length }} equations found.</p>
       <macro :macroString="obj.macros"></macro>
       <equation :obj="eq" :key="eq.arxiv_id" v-for="eq in obj.equations" ></equation>
     </div>
@@ -31,16 +32,38 @@ export default {
       },
     }
   },
+  computed: {
+    authorsStr: function () {
+      return this.obj.authors.map(a => a.name).join(", ")
+    }
+  }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 #paper_equations {
   margin-top: 30px;
 }
 .paper {
-  width: 800px;
+  width: 100%;
   margin: 0 auto;
+
+  .paper_title {
+    margin: .5em 0 .5em 5px;
+    font-size: x-large;
+    font-weight: bold;
+  }
+
+  .paper_authors {
+    margin: .5em 0 2em 5px;
+  font-size: medium;
+    line-height: 150%;
+  }
+  .paper_equations {
+    .n_hits {
+      color: blue;
+    }
+  }
 }
 
 li {

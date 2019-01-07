@@ -1,16 +1,11 @@
 <template>
-  <div class="equation">
-    <div class='col'>
-      <vue-mathjax class="expression" :formula="mathExp"></vue-mathjax>
-    </div>
-    <div class='col' id="copy_button">
-      <button type="button"
-              class='copy_equation'
-              v-clipboard:copy="obj.body"
-              v-clipboard:success="onCopy"
-              v-clipboard:error="onError">Copy
-      </button>
-    </div>
+  <div class="equation card">
+    <vue-mathjax 
+      class="expression" 
+      :formula="mathExp"
+      v-clipboard:copy="obj.expression"
+      v-clipboard:success="onCopy"
+      v-clipboard:error="onError"></vue-mathjax>
   </div>
 </template>
 
@@ -28,10 +23,10 @@ export default {
   },
   methods: {
     onCopy: function (e) {
-      console.info('You just copied: ' + e.text)
+      // console.info('You just copied: ' + e.text)
     },
     onError: function (e) {
-      console.info('Failed to copy texts')
+      // console.info('Failed to copy texts')
     }
   },
   computed: {
@@ -49,25 +44,17 @@ export default {
 <style scoped lang="scss">
 .equation {
   width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  margin-left: -20px;
+  margin-bottom: 20px;
+  padding: 20px 0;
+}
 
-  .col {
-    margin-left: 20px;
-  }
-  
-  .expression {
-    flex: 3; 
-  }
-  
-  #copy_button {
-    flex: 1; 
-    button {
-      height: 20px;
-      width: 50px;
-    }
-  }
+.card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.card:hover {
+  cursor: pointer;
+  box-shadow: 0 14px 14px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 </style>
