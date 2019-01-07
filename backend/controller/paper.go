@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/echo"
 	zglob "github.com/mattn/go-zglob"
 	"github.com/raahii/arxiv-equations/backend/arxiv"
+	"github.com/raahii/arxiv-equations/backend/config"
 	"github.com/raahii/arxiv-equations/backend/db"
 	"github.com/raahii/arxiv-equations/backend/latex"
 )
@@ -204,7 +205,8 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			paper = FetchPaper(arxivId)
 
 			// extract macros and equations
-			tarballDir := "tarballs"
+			vars := config.Config.Variables
+			tarballDir := vars["tarballDir"]
 			paper.readLatexSource(tarballDir)
 
 			if dbc := database.Create(&paper); dbc.Error != nil {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"net/http"
 	"os"
 
 	"github.com/jinzhu/gorm"
@@ -24,7 +25,8 @@ func initApp(db *gorm.DB) {
 	}
 
 	// Create tarball dirs
-	os.Mkdir("tarballs", 0777)
+	vars := config.Config.Variables
+	os.Mkdir(vars["tarballDir"], 0777)
 }
 
 func setConfig() {
@@ -56,9 +58,15 @@ func main() {
 	}))
 
 	// controller
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
 	e.GET("/papers", controller.FindPaperFromUrl())
-	e.GET("/papers/:id", controller.ShowPaper())
 
 	// start
-	e.Start(":1323")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "1323"
+	}
+	e.Start(":" + port)
 }

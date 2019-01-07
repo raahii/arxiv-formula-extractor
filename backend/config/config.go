@@ -1,9 +1,10 @@
 package config
 
 import (
-	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 var Config Conf
@@ -14,18 +15,20 @@ type Environment struct {
 }
 
 type Conf struct {
-	Database Database `yaml:"db"`
+	Database  Database          `yaml:"db"`
+	Variables map[string]string `yaml:"vars"`
 }
 
 type Database struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	Name     string `yaml:"name"`
+	Host     string `yaml:"host"`
 }
 
 func SetEnvironment(env string) {
 
-	buf, err := ioutil.ReadFile("config/environment.yml")
+	buf, err := ioutil.ReadFile("config/config.yml")
 	if err != nil {
 		log.Fatal(err)
 	}

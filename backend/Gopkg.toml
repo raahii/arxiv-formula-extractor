@@ -23,7 +23,12 @@
 #   non-go = false
 #   go-tests = true
 #   unused-packages = true
+#
 
+[metadata.heroku]
+  root-package = "github.com/raahii/arxiv-equations/"
+  go-version = "1.11.4"
+  install = [ "./..." ]
 
 [[constraint]]
   name = "github.com/jinzhu/gorm"
