@@ -5,8 +5,12 @@
 </template>
 
 <script>
+import PulseLoader from "vue-spinner/src/PulseLoader";
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    PulseLoader
+  }
 }
 </script>
 

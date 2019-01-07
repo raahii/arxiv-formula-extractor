@@ -6,7 +6,7 @@
         {{ service_name }}
       </div>
       <div id="subtitle">
-        provides latex format equations from <a href="https://arxiv.org/">Arxiv</a>
+        provides latex format equations from <a href="https://arxiv.org/">Arxiv</a>.
       </div>
     </div>
   
@@ -14,7 +14,7 @@
       <!--  search box -->
       <div id="search_box">
         <input v-model="arxiv_url" placeholder="https://arxiv.org/abs/...">
-        <button v-on:click="find_paper">Go</button>
+        <button v-on:click="find_paper" v-bind:disabled="isLoading">Go</button>
       </div>
 
       <!-- error message -->
@@ -25,8 +25,9 @@
       </p>
 
       <!-- rendering paper -->
-      <div id="result" v-if="searched">
-        <paper v-bind:obj="paper"></paper>
+      <div id="result">
+        <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
+        <paper v-bind:obj="paper" v-if="!isLoading"></paper>
       </div>
     </div>
   </div>
@@ -35,11 +36,13 @@
 <script>
 import axios from 'axios'
 import Paper from './Paper.vue'
+import PulseLoader from "vue-spinner/src/PulseLoader";
 
 export default {
   name: 'TopPage',
   components: {
-    Paper
+    "paper": Paper,
+    "pulse-loader": PulseLoader,
   },
   data () {
     return {
@@ -48,6 +51,7 @@ export default {
       searched: false,
       paper: {},
       errors: [],
+      isLoading: false,
     }
   },
   methods: {
@@ -56,13 +60,17 @@ export default {
       let prefix = "https://arxiv.org/abs/"
 
       if (this.arxiv_url.indexOf(prefix) == -1) {
-        this.errors.push("The url must starts 'https://arxiv.org/abs/'");
+        this.errors.push("The url must start 'https://arxiv.org/abs/'");
       }
-
       e.preventDefault();
     },
     find_paper: function (e) {
       this.checkUrl(e)
+
+      this.isLoading = true
+      this.searched = false
+      this.paper = null
+
       axios
         .get("http://localhost:1323/papers?url="+this.arxiv_url)
         .then(response => {
@@ -72,14 +80,16 @@ export default {
             return
           }
 
-          this.searched = true
           this.paper = response.data.paper
         })
         .catch(error => {
           console.log(error)
-          this.errored = true
         })
-    }
+        .finally(() => {
+          this.searched = true
+          this.isLoading = false
+        })
+    },
   }
 }
 </script>
@@ -109,6 +119,9 @@ a {
   width: 90%;
   @media screen and (min-width:700px) { 
     width: 80%;
+  }
+  @media screen and (min-width:1000px) { 
+    width: 60%;
   }
   margin: 0 auto;
 
@@ -150,11 +163,16 @@ a {
      color:red;
    }
   }
-
+  
   #result {
     width: 100%;
     p {
       font-size: 14px;
+    }
+    .loading_spinner {
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
     }
   }
 }

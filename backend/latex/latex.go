@@ -151,6 +151,7 @@ func FindEquations(str string) ([]string, error) {
 		`align`,
 		`aligned`,
 		`eqnarray`,
+		`array`,
 	}
 
 	equations := []string{}

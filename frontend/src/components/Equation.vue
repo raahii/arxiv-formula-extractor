@@ -19,7 +19,7 @@ export default {
   },
   props: ['obj'],
   mounted: function () {
-    console.info(this.mathExp)
+    // console.info(this.mathExp)
   },
   methods: {
     onCopy: function (e) {

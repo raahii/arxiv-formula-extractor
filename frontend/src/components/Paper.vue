@@ -27,9 +27,6 @@ export default {
   props: ['obj'],
   data () {
     return {
-      exampleMacro: {
-        expression: "\\newcommand{\\bfrac}[2]{\\genfrac{[}{]}{0pt}{}{#1}{#2}}"
-      },
     }
   },
   computed: {
