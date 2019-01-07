@@ -94,7 +94,7 @@ export default {
       this.setParam()
 
       axios
-        .get("http://localhost:1323/papers?url="+this.arxiv_url)
+        .get(process.env.BACKEND_URL+"/papers?url="+this.arxiv_url)
         .then(response => {
           if (response.status != 200)  {
             console.log(response.error)
