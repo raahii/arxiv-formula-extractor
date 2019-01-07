@@ -1,9 +1,9 @@
 <template>
   <div class="top_page">
-    <!--  title, description -->
+    <!-- header -->
     <div id="header">
       <div id="title">
-        {{ service_name }}
+        <router-link to="/">{{ service_name }}</router-link>
       </div>
       <div id="subtitle">
         provides latex format equations from <a href="https://arxiv.org/">Arxiv</a>.
@@ -27,8 +27,13 @@
       <!-- rendering paper -->
       <div id="result">
         <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
-        <paper v-bind:obj="paper" v-if="!isLoading"></paper>
+        <paper v-bind:obj="paper" v-if="searched && !isLoading"></paper>
       </div>
+    </div>
+
+    <!-- footer -->
+    <div id="footer">
+      {{ service_name }} by <a :href="author_url" target="_blank">{{ author_name }}</a>
     </div>
   </div>
 </template>
@@ -47,10 +52,13 @@ export default {
   data () {
     return {
       service_name: 'Arxiv Equations',
+      service_url: 'http://localhost:8000',
+      author_name: 'raahii',
+      author_url: 'https://raahii.github.io/about/',
       arxiv_url: '',
-      searched: false,
       paper: {},
       errors: [],
+      searched: false,
       isLoading: false,
     }
   },
@@ -107,16 +115,23 @@ a {
 #header {
   width: 100%;
   height: auto;
-  background: #FAFAFA;
+  background: #F5F5F5;
   padding: 20px 0;
   text-align: center;
 
   #title {
     font-size: 32px;
+    a {
+      color: #2c3e50;
+      text-decoration: none;
+    }
   }
 }
 #main {
   width: 90%;
+  min-height: 100vh;
+  height: 100%;
+
   @media screen and (min-width:700px) { 
     width: 80%;
   }
@@ -137,7 +152,8 @@ a {
       display: block;
       box-sizing: border-box;
       color: #2c3e50;
-      height: 30px;
+      height: 40px;
+      padding: 5px 5px;
       font-size: 18px;
       border-color: gray;
     }
@@ -145,10 +161,17 @@ a {
       flex: 0 1 20%;
       display: block;
       box-sizing: border-box;
-      height: 30px;
-      margin-left: 2px;
-      background: black;
+      height: 40px;
+      margin-left: 5px;
+      line-height: 40px;
+
+      background-color: #42b983;
+      border: none;
       color: white;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 18px;
     }
   }
   #errors {
@@ -175,5 +198,14 @@ a {
       text-align: center;
     }
   }
+}
+
+#footer {
+  box-sizing: border-box;
+  height: 100px;
+  background: #F5F5F5;
+  padding-top: 45px;
+  text-align: center;
+  margin-top: 30px;
 }
 </style>
