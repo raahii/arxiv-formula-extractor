@@ -55,6 +55,7 @@ export default {
       service_url: 'http://localhost:8000',
       author_name: 'raahii',
       author_url: 'https://raahii.github.io/about/',
+      url_prefix: "https://arxiv.org/abs/",
       arxiv_url: '',
       paper: {},
       errors: [],
@@ -62,22 +63,35 @@ export default {
       isLoading: false,
     }
   },
+  mounted: function() {
+    var arxiv_id = this.$route.query.arxiv_id
+    console.log(arxiv_id)
+    if (arxiv_id) {
+      this.arxiv_url = this.url_prefix + arxiv_id
+      this.find_paper()
+    }
+  },
   methods: {
+    search: function(e) {
+      this.checkUrl(e)
+      this.find_paper()
+    },
     checkUrl: function (e) {
       this.errors = [];
-      let prefix = "https://arxiv.org/abs/"
 
-      if (this.arxiv_url.indexOf(prefix) == -1) {
+      if (this.arxiv_url.indexOf(this.url_prefix) == -1) {
         this.errors.push("The url must start 'https://arxiv.org/abs/'");
       }
       e.preventDefault();
     },
-    find_paper: function (e) {
-      this.checkUrl(e)
-
+    setParam: function() {
+      let parts = this.arxiv_url.split("/")
+      this.$router.push({query: {arxiv_id: parts[parts.length-1]}})
+    },
+    find_paper: function () {
       this.isLoading = true
       this.searched = false
-      this.paper = null
+      this.setParam()
 
       axios
         .get("http://localhost:1323/papers?url="+this.arxiv_url)
