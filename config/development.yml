@@ -1,2 +1,2 @@
 tarballDir: ./tarballs
-frontAddr: localhost:8080
+frontAddr: http://localhost:8080

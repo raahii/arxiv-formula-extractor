@@ -11,13 +11,6 @@ Vue.use(VueMathjax)
 
 Vue.config.productionTip = false
 
-// let axiosInstance = axios.create({
-//   baseURL: 'https://localhost:13',
-//   #<{(| other custom settings |)}>#
-// });
-//
-// module.exports = axiosInstance;
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

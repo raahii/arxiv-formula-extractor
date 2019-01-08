@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"net/http"
 	"os"
 
@@ -12,6 +13,15 @@ import (
 	"github.com/raahii/arxiv-equations/controller"
 	"github.com/raahii/arxiv-equations/db"
 )
+
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "1323"
+	}
+
+	return port
+}
 
 func initApp(db *gorm.DB) {
 	// Create tables
@@ -51,22 +61,24 @@ func main() {
 
 	// middlewares
 	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{config.Config.Variables["frontAddr"]},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
+	e.Use(middleware.Recover())
 
-	// controller
+	// error handler
+	e.HTTPErrorHandler = controller.JSONErrorHandler
+
+	// routing
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 	e.GET("/papers", controller.FindPaperFromUrl())
 
 	// start
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "1323"
+	err := e.Start(":" + getPort())
+	if err != nil {
+		log.Fatal(err)
 	}
-	e.Start(":" + port)
 }

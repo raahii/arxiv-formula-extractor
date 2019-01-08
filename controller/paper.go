@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -140,14 +139,23 @@ func (paper *Paper) readLatexSource(path string) {
 		equations = append(equations, eq)
 	}
 	paper.Equations = equations
+
+	// remove tarball
+	if err := os.Remove(tarballPath); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.RemoveAll(sourcePath); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func FetchPaper(arxivId string) Paper {
+func FetchPaper(arxivId string) (Paper, error) {
 	// search papers
 	params := map[string]string{
 		"id_list": arxivId,
 	}
 	apiResult := arxiv.SearchPapers(params)
+	// error handling is needed
 	apiEntry := apiResult.Entries[0]
 
 	// convert api result to paper entity
@@ -177,11 +185,14 @@ func FetchPaper(arxivId string) Paper {
 	paper.AbsUrl = absUrl
 	paper.TarballUrl = tarballUrl
 
-	return paper
+	return paper, nil
 }
 
 func FindPaperFromUrl() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		err := fmt.Errorf("test error")
+		return err
+
 		// obtain url from GET parameters
 		url := c.QueryParam("url")
 		if url == "" {
@@ -202,7 +213,10 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			// if the paper doesn't exist in the database
 
 			// fetch the paper
-			paper = FetchPaper(arxivId)
+			paper, err := FetchPaper(arxivId)
+			if err != nil {
+				return err
+			}
 
 			// extract macros and equations
 			vars := config.Config.Variables
@@ -223,27 +237,6 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			`\newcommand{\bm}[1]{\boldsymbol #1}`,
 		}
 		paper.Macros += "\n" + strings.Join(defaultMacros, "\n")
-
-		response := map[string]interface{}{
-			"paper": paper,
-		}
-
-		return c.JSON(http.StatusOK, response)
-	}
-}
-
-func ShowPaper() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// obtain path parameter
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// find the paper
-		db := db.GetConnection()
-		paper := Paper{}
-		db.First(&paper, int32(id))
 
 		response := map[string]interface{}{
 			"paper": paper,

@@ -8,36 +8,18 @@ import (
 	"strings"
 )
 
-func FindNewline(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-	return false
-}
-
 func RemoveComment(str string) string {
-	newStr := make([]rune, 0, len([]rune(str)))
-	percent := rune('%')
-	newline := rune('\n')
-
-	valid := true
-	for _, c := range str {
-		if c == percent {
-			valid = false
+	for {
+		if !strings.Contains(str, "%") {
+			break
 		}
 
-		if c == newline {
-			valid = true
-		}
-
-		if valid {
-			newStr = append(newStr, c)
-		}
+		startIndex := strings.Index(str, "%")
+		endIndex := startIndex + strings.Index(str[startIndex:], "\n")
+		str = str[:startIndex] + str[endIndex:]
 	}
 
-	return string(newStr)
+	return str
 }
 
 func RemoveTags(str string, tags []string) string {
@@ -191,7 +173,7 @@ func FindEquations(str string) ([]string, error) {
 		commandEnd := fmt.Sprintf("\\end{%s", command)
 		endIndex := strings.Index(str, commandEnd)
 		if endIndex == -1 {
-			return nil, fmt.Errorf("Corresponding end command is not found!, %s", command)
+			return nil, fmt.Errorf("Corresponding end command is not found!, %s\n%v", command, equations)
 		}
 
 		// check nested command exists

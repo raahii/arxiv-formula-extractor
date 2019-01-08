@@ -14,14 +14,12 @@
       <!--  search box -->
       <div id="search_box">
         <input v-model="arxiv_url" placeholder="https://arxiv.org/abs/...">
-        <button v-on:click="find_paper" v-bind:disabled="isLoading">Go</button>
+        <button v-on:click="search" v-bind:disabled="isLoading">Go</button>
       </div>
 
       <!-- error message -->
-      <p id="errors" v-if="errors.length">
-        <ul>
-          <li class='error' v-for="error in errors">{{ error }}</li>
-        </ul>
+      <p id="error" v-if="error">
+        {{ error }}
       </p>
 
       <!-- rendering paper -->
@@ -58,14 +56,13 @@ export default {
       url_prefix: "https://arxiv.org/abs/",
       arxiv_url: '',
       paper: {},
-      errors: [],
+      error: null,
       searched: false,
       isLoading: false,
     }
   },
   mounted: function() {
     var arxiv_id = this.$route.query.arxiv_id
-    console.log(arxiv_id)
     if (arxiv_id) {
       this.arxiv_url = this.url_prefix + arxiv_id
       this.find_paper()
@@ -73,16 +70,16 @@ export default {
   },
   methods: {
     search: function(e) {
-      this.checkUrl(e)
-      this.find_paper()
-    },
-    checkUrl: function (e) {
-      this.errors = [];
-
-      if (this.arxiv_url.indexOf(this.url_prefix) == -1) {
-        this.errors.push("The url must start 'https://arxiv.org/abs/'");
+      if (this.checkUrl(e)) {
+        this.find_paper()
       }
-      e.preventDefault();
+    },
+    checkUrl: function () {
+      if (this.arxiv_url.indexOf(this.url_prefix) != 0) {
+        this.error = "The url must start 'https://arxiv.org/abs/'"
+        return false
+      }
+      return true
     },
     setParam: function() {
       let parts = this.arxiv_url.split("/")
@@ -92,23 +89,20 @@ export default {
       this.isLoading = true
       this.searched = false
       this.setParam()
+      this.paper = null
 
       axios
         .get(process.env.BACKEND_URL+"/papers?url="+this.arxiv_url)
         .then(response => {
-          if (response.status != 200)  {
-            console.log(response.error)
-            this.errored = true
-            return
-          }
-
+          this.searched = true
           this.paper = response.data.paper
         })
         .catch(error => {
-          console.log(error)
+          let errorMsg = error.response.data.code + ": "
+          errorMsg += error.response.data.message
+          this.error = errorMsg
         })
         .finally(() => {
-          this.searched = true
           this.isLoading = false
         })
     },
@@ -142,21 +136,21 @@ a {
   }
 }
 #main {
-  width: 90%;
   min-height: 100vh;
   height: 100%;
+  margin: 40px auto 0;
 
+  width: 90%;
   @media screen and (min-width:700px) { 
     width: 80%;
   }
   @media screen and (min-width:1000px) { 
     width: 60%;
   }
-  margin: 0 auto;
 
   #search_box {
     width: 100%;
-    margin: 20px auto 40px;
+    margin: 20px auto 20px;
     display: flex;
     flex-direction: row;
     align-content: center;
@@ -188,21 +182,26 @@ a {
       font-size: 18px;
     }
   }
-  #errors {
-    width: 100%;
-    font-size: 1.2em;
-    margin-bottom: 3em;
 
-    ul {
-      list-style-type: disc;
-    }
-    .error {
-     color:red;
-   }
+  #error {
+    font-size: 1.2em;
+    line-height: 1.5;
+    color: #a94442;
+    background-color: #f2dede;
+
+    box-sizing: border-box;
+    width: 100%;
+    padding: 15px 15px 15px 35px;
+    margin: 20px 0;
+
+    border-color: #ebccd1;
+    border: 1px solid transparent;
+    border-radius: 4px;
   }
   
   #result {
     width: 100%;
+    margin: 20px 0;
     p {
       font-size: 14px;
     }
