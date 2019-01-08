@@ -1,7 +1,6 @@
 .idea
 
-config/environment.yml
 vendor
 
-tarballs/*
-!gitkeep
+tmp/*
+!.gitkeep

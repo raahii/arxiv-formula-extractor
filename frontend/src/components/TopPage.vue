@@ -6,7 +6,7 @@
         <a href="/">{{ service_name }}</a>
       </div>
       <div id="subtitle">
-        provides latex format equations from <a href="https://arxiv.org/">Arxiv</a>.
+        provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.
       </div>
     </div>
   

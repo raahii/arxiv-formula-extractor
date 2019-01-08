@@ -1,2 +1,2 @@
-tarballDir: ./tarballs
+tarballDir: ./tmp
 frontAddr: http://localhost:8080
