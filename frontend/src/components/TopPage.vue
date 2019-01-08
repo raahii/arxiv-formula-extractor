@@ -3,7 +3,7 @@
     <!-- header -->
     <div id="header">
       <div id="title">
-        <router-link to="/">{{ service_name }}</router-link>
+        <a href="/">{{ service_name }}</a>
       </div>
       <div id="subtitle">
         provides latex format equations from <a href="https://arxiv.org/">Arxiv</a>.
@@ -25,7 +25,7 @@
       <!-- rendering paper -->
       <div id="result">
         <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
-        <paper v-bind:obj="paper" v-if="searched && !isLoading"></paper>
+        <paper v-bind:obj="paper" v-if="paper && !isLoading"></paper>
       </div>
     </div>
 
@@ -55,9 +55,8 @@ export default {
       author_url: 'https://raahii.github.io/about/',
       url_prefix: "https://arxiv.org/abs/",
       arxiv_url: '',
-      paper: {},
+      paper: null,
       error: null,
-      searched: false,
       isLoading: false,
     }
   },
@@ -70,6 +69,7 @@ export default {
   },
   methods: {
     search: function(e) {
+      this.error = null
       if (this.checkUrl(e)) {
         this.find_paper()
       }
@@ -81,29 +81,30 @@ export default {
       }
       return true
     },
-    setParam: function() {
+    setUrlParam: function() {
       let parts = this.arxiv_url.split("/")
       this.$router.push({query: {arxiv_id: parts[parts.length-1]}})
     },
     find_paper: function () {
       this.isLoading = true
-      this.searched = false
-      this.setParam()
       this.paper = null
-
-      axios
-        .get(process.env.BACKEND_URL+"/papers?url="+this.arxiv_url)
+      
+      let self = this
+      axios({
+          method : 'GET',
+          url    : '/papers',
+          params : { url : self.arxiv_url }
+        })
         .then(response => {
-          this.searched = true
-          this.paper = response.data.paper
+          self.paper = response.data.paper
+          self.isLoading = false
+          self.setUrlParam()
         })
         .catch(error => {
           let errorMsg = error.response.data.code + ": "
           errorMsg += error.response.data.message
-          this.error = errorMsg
-        })
-        .finally(() => {
-          this.isLoading = false
+          self.error = errorMsg
+          self.isLoading = false
         })
     },
   }

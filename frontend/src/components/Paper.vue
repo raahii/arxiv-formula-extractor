@@ -7,7 +7,7 @@
       {{ this.authorsStr }}
     </div>
     <div class="paper_equations">
-      <p class="n_hits"> {{ this.obj.equations.length }} equations found.</p>
+      <p class="n_hits success"> {{ this.obj.equations.length }} equations found.</p>
       <macro :macroString="obj.macros"></macro>
       <equation :obj="eq" :key="eq.arxiv_id" v-for="eq in obj.equations" ></equation>
     </div>
@@ -43,17 +43,17 @@ export default {
 }
 .paper {
   width: 100%;
-  margin: 0 auto;
+  margin: 40px auto;
 
   .paper_title {
-    margin: .5em 0 .5em 5px;
+    margin: 5px 0px;
     font-size: x-large;
     font-weight: bold;
   }
 
   .paper_authors {
-    margin: .5em 0 2em 5px;
-  font-size: medium;
+    margin: 5px 0px;
+    font-size: medium;
     line-height: 150%;
   }
   .paper_equations {

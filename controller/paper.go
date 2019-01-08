@@ -237,16 +237,16 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			if err != nil {
 				return err
 			}
-			paper = _paper
 
 			// extract macros and equations
 			vars := config.Config.Variables
 			tarballDir := vars["tarballDir"]
-			paper.readLatexSource(tarballDir)
+			_paper.readLatexSource(tarballDir)
 
-			if dbc := database.Create(&paper); dbc.Error != nil {
+			if dbc := database.Create(&_paper); dbc.Error != nil {
 				return dbc.Error
 			}
+			paper = _paper
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
 		}
