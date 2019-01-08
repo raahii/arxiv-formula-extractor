@@ -2,11 +2,13 @@
   <div class="top_page">
     <!-- header -->
     <div id="header">
+      <div id="dummy"></div>
       <div id="title">
-        <a href="/">{{ service_name }}</a>
+        <a id="main_title" href="/">{{ service_name }}</a>
+        <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
       </div>
-      <div id="subtitle">
-        provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.
+      <div id="sns_icons">
+        <a :href="github_url" target="_blank"><img id="github" src="/static/github.png"></a>
       </div>
     </div>
   
@@ -54,6 +56,7 @@ export default {
       author_name: 'raahii',
       author_url: 'https://raahii.github.io/about/',
       url_prefix: "https://arxiv.org/abs/",
+      github_url: "https://github.com/raahii/arxiv-equations",
       arxiv_url: '',
       paper: null,
       error: null,
@@ -134,13 +137,38 @@ a {
   height: auto;
   background: #F5F5F5;
   padding: 20px 0;
-  text-align: center;
-
+  display: flex;
+  
+  #dummy {
+    flex: 33%;
+  }
   #title {
-    font-size: 32px;
-    a {
+    flex: 34%;
+    display: inline-flex;
+    flex-direction: column;
+    margin: 10px 0;
+
+    #main_title {
+      display: inline-box;
+      margin: 0 auto;
+      font-size: 32px;
       color: #2c3e50;
       text-decoration: none;
+    }
+    #sub_title {
+      display: inline-box;
+      margin: 0 auto;
+    }
+  }
+  #sns_icons {
+    flex: 33%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    #github {
+      height: 32px;
+      width: 32px;
     }
   }
 }
