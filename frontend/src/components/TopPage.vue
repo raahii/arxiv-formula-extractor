@@ -168,11 +168,32 @@ a {
       flex: 0 1 80%;
       display: block;
       box-sizing: border-box;
-      color: #2c3e50;
+
+      width: 100%;
       height: 40px;
+
       padding: 5px 5px;
       font-size: 18px;
-      border-color: gray;
+      outline: none;
+      border: 1px solid #D1D7E3;
+      border-radius: 4px;
+      line-height: 26px;
+      padding: 8px 36px 8px 14px;
+      box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
+      color: #797C86;
+
+      &::-webkit-input-placeholder {
+        color: #C7C8CC;
+      }
+      &:-moz-placeholder {
+        color: #C7C8CC;
+      }
+      &::-moz-placeholder {
+        color: #C7C8CC;
+      }
+      &:-ms-input-placeholder {
+        color: #C7C8CC;
+      }
     }
     button {
       flex: 0 1 20%;
@@ -182,6 +203,7 @@ a {
       margin-left: 5px;
       line-height: 40px;
 
+      border-radius: 4px;
       background-color: #42b983;
       border: none;
       color: white;

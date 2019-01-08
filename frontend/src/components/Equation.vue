@@ -6,6 +6,7 @@
       v-clipboard:copy="obj.expression"
       v-clipboard:success="onCopy"
       v-clipboard:error="onError"></vue-mathjax>
+    <p class="balloon">copy</p>
   </div>
 </template>
 
@@ -46,6 +47,30 @@ export default {
   width: 100%;
   margin-bottom: 20px;
   padding: 20px 0;
+  position: relative;
+}
+
+.balloon {
+  visibility: hidden;
+  opacity: 0;
+  transition: .3s linear;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  padding: 0 5px;
+  margin: 0;
+
+  color: #797C86;
+  font-size: 13px;
+  outline: none;
+  border-top: none;
+  border-right: none;
+  border-left: solid 1px #D1D7E3;
+  border-bottom: solid 1px #D1D7E3;
+  line-height: 24px;
+  box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
 }
 
 .card {
@@ -58,5 +83,10 @@ export default {
 .card:hover {
   cursor: pointer;
   box-shadow: 0 5px 5px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
+}
+
+.card:hover .balloon {
+  visibility: visible;
+  opacity: 1;
 }
 </style>
