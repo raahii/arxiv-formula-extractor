@@ -2,8 +2,6 @@ package latex
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -22,12 +20,15 @@ func RemoveComment(str string) string {
 	return str
 }
 
-func RemoveTags(str string, tags []string) string {
+func RemoveTags(str string, tags []string) (string, error) {
 	tagsStr := strings.Join(tags, "|")
 	pattern := fmt.Sprintf(`\\(%s)(\{.*\})?(\n)?`, tagsStr)
-	re := regexp.MustCompile(pattern)
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return "", err
+	}
 
-	return re.ReplaceAllString(str, "")
+	return re.ReplaceAllString(str, ""), nil
 }
 
 func FindMacroCommandEnd(str string, command string) (int, error) {
@@ -205,23 +206,4 @@ func FindEquations(str string) ([]string, error) {
 	}
 
 	return equations, nil
-}
-
-func main() {
-	data, err := ioutil.ReadFile("samples/tarball/GAN/adversarial.tex")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	latex_source := string(data)
-	latex_source = RemoveComment(latex_source)
-
-	equations, err := FindEquations(latex_source)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, s := range equations {
-		fmt.Printf("%v\n", RemoveTags(s, []string{`\label`}))
-	}
 }

@@ -43,11 +43,11 @@ func parseXML(xmlStr string) Feed {
 	return result
 }
 
-func SearchPapers(params map[string]string) Feed {
+func SearchPapers(params map[string]string) (Feed, error) {
 	// define api url
 	u, err := url.Parse("http://export.arxiv.org/api/query")
 	if err != nil {
-		log.Fatal(err)
+		return Feed{}, err
 	}
 
 	// construct query string
@@ -60,15 +60,15 @@ func SearchPapers(params map[string]string) Feed {
 	// send the request
 	resp, err := http.Get(u.String())
 	if err != nil {
-		log.Fatal(err)
+		return Feed{}, err
 	}
 
 	// parse result xml
 	xmlBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return Feed{}, err
 	}
 	xmlObj := parseXML(string(xmlBytes))
 
-	return xmlObj
+	return xmlObj, nil
 }

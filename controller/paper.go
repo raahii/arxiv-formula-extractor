@@ -19,31 +19,41 @@ import (
 	"github.com/raahii/arxiv-equations/latex"
 )
 
-func readFile(path string) string {
+func readFile(path string) (string, error) {
 	str, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return string(str)
+	return string(str), nil
 }
 
-func readAllSources(mainLatexPath string, basePath string) string {
+func readAllSources(mainLatexPath string, basePath string) (string, error) {
 	// read all \input or \include tag and
 	// obtain all related sources concatenated string
-	source := readFile(mainLatexPath)
+	source, err := readFile(mainLatexPath)
+	if err != nil {
+		return "", err
+	}
+
 	source = latex.RemoveComment(source)
 	source = strings.Replace(source, "*{", "{", -1)
 	source = strings.Replace(source, "*}", "}", -1)
 
-	re := regexp.MustCompile(`\\(input|include)\{(.*?)\}`)
+	re, err := regexp.Compile(`\\(input|include)\{(.*?)\}`)
+	if err != nil {
+		return "", err
+	}
 
 	resolveInputTag := func(s string) string {
 		path := re.FindStringSubmatch(s)[2]
 		if filepath.Ext(path) == "" {
 			path = path + ".tex"
 		}
-		_source := readFile(filepath.Join(basePath, path))
+		_source, err := readFile(filepath.Join(basePath, path))
+		if err != nil {
+			panic(err)
+		}
 		_source = latex.RemoveComment(_source)
 		return _source
 	}
@@ -56,15 +66,18 @@ func readAllSources(mainLatexPath string, basePath string) string {
 		source = re.ReplaceAllStringFunc(source, resolveInputTag)
 	}
 
-	return source
+	return source, nil
 }
 
-func findSourceRoot(paths []string) string {
+func findSourceRoot(paths []string) (string, error) {
 	// search source which includes '\documentclass'
 	found := false
 	mainPath := ""
 	for _, path := range paths {
-		source := readFile(path)
+		source, err := readFile(path)
+		if err != nil {
+			return "", err
+		}
 		source = latex.RemoveComment(source)
 		if strings.Contains(source, `\documentclass`) {
 			found = true
@@ -72,9 +85,9 @@ func findSourceRoot(paths []string) string {
 		}
 	}
 	if !found {
-		log.Fatal(fmt.Errorf("Main latex source is not found"))
+		return "", fmt.Errorf("Latex file is not found")
 	}
-	return mainPath
+	return mainPath, nil
 }
 
 func extractArxivId(arxivUrl string) string {
@@ -83,46 +96,49 @@ func extractArxivId(arxivUrl string) string {
 	return strs[len(strs)-1]
 }
 
-func (paper *Paper) readLatexSource(path string) {
+func (paper *Paper) readLatexSource(path string) error {
 	var err error
 
 	// download tarball
-	log.Println("Downloading tarball", paper.TarballUrl)
 	tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
 	err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
 	if err != nil {
-		log.Fatal(err)
+		return newErrorWithMsg(err, "Error occured during downloading tarball")
 	}
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, paper.ArxivId)
-	log.Println("Decompressing tarball", sourcePath)
 	os.Mkdir(sourcePath, 0777)
 
 	err = exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
 	if err != nil {
-		log.Fatal(err)
+		return newErrorWithMsg(err, "Error occured during decompressing tarball.")
 	}
 
 	// list all *.tex
-	log.Println("Processing tex files")
 	pattern := filepath.Join(sourcePath, "**/*.tex")
 	files, err := zglob.Glob(pattern)
 	if err != nil {
-		log.Fatal(err)
+		return newErrorWithMsg(err, "Error occurred during processing tex files(1)")
 	}
 
 	// find root latex source file
-	rootFile := findSourceRoot(files)
+	rootFile, err := findSourceRoot(files)
+	if err != nil {
+		return newErrorWithMsg(err, "Error occurred during processing tex files(2)")
+	}
 
 	// obtain all latex source
-	allSource := readAllSources(rootFile, sourcePath)
+	allSource, err := readAllSources(rootFile, sourcePath)
+	if err != nil {
+		return newErrorWithMsg(err, "Error occurred during processing tex files(3)")
+	}
 
 	// obtain macros
 	log.Println("Extracting macros")
 	macros, err := latex.FindMacros(allSource)
 	if err != nil {
-		log.Fatal(err)
+		return newErrorWithMsg(err, "Error occurred during extracting macros")
 	}
 	paper.Macros = strings.Join(macros, "\n")
 
@@ -130,7 +146,7 @@ func (paper *Paper) readLatexSource(path string) {
 	log.Println("Extracting equations")
 	equationStrs, err := latex.FindEquations(allSource)
 	if err != nil {
-		log.Fatal(err)
+		return newErrorWithMsg(err, "Error occurred during extracting equations")
 	}
 	equations := []Equation{}
 	for _, str := range equationStrs {
@@ -142,21 +158,30 @@ func (paper *Paper) readLatexSource(path string) {
 
 	// remove tarball
 	if err := os.Remove(tarballPath); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if err := os.RemoveAll(sourcePath); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func FetchPaper(arxivId string) (Paper, error) {
-	// search papers
+	// search paper from id
 	params := map[string]string{
 		"id_list": arxivId,
 	}
-	apiResult := arxiv.SearchPapers(params)
-	// error handling is needed
+	apiResult, err := arxiv.SearchPapers(params)
+	if err != nil {
+		return Paper{}, err
+	}
+
 	apiEntry := apiResult.Entries[0]
+	if apiEntry.Title == "Error" {
+		err := fmt.Errorf(apiEntry.Summary)
+		return Paper{}, err
+	}
 
 	// convert api result to paper entity
 	authors := []Author{} // for now, authors are just a string
@@ -190,13 +215,10 @@ func FetchPaper(arxivId string) (Paper, error) {
 
 func FindPaperFromUrl() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		err := fmt.Errorf("test error")
-		return err
-
 		// obtain url from GET parameters
 		url := c.QueryParam("url")
 		if url == "" {
-			log.Fatal(fmt.Errorf("Invalid parameters"))
+			fmt.Errorf("Invalid parameters")
 		}
 
 		// remove version number from url
@@ -207,16 +229,15 @@ func FindPaperFromUrl() echo.HandlerFunc {
 		arxivId := extractArxivId(url)
 
 		// find the paper
-		database := db.GetConnection()
 		paper := Paper{}
+		database := db.GetConnection()
 		if database.Where("arxiv_id = ?", arxivId).First(&paper).RecordNotFound() {
-			// if the paper doesn't exist in the database
-
-			// fetch the paper
-			paper, err := FetchPaper(arxivId)
+			// if the paper doesn't exist in the database, fetch the paper
+			_paper, err := FetchPaper(arxivId)
 			if err != nil {
 				return err
 			}
+			paper = _paper
 
 			// extract macros and equations
 			vars := config.Config.Variables
@@ -224,12 +245,10 @@ func FindPaperFromUrl() echo.HandlerFunc {
 			paper.readLatexSource(tarballDir)
 
 			if dbc := database.Create(&paper); dbc.Error != nil {
-				log.Fatal(dbc.Error)
+				return dbc.Error
 			}
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
-			// tarballDir := "tarballs"
-			// paper.readLatexSource(tarballDir)
 		}
 
 		// add macro to process fine for unsupported command in mathjax

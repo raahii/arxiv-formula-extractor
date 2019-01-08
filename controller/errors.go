@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -9,6 +10,11 @@ import (
 type APIError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+func newErrorWithMsg(err error, msg string) error {
+	msg += "(" + err.Error() + ")"
+	return fmt.Errorf(msg)
 }
 
 // error handler which returns errors in json format
