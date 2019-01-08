@@ -2,9 +2,53 @@ package latex
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 )
+
+func FindCommandEnd(str string) (int, error) {
+	// ignore first open brace
+	found := false
+	start := 0
+	for i, c := range str {
+		if c == '{' {
+			found = true
+			start = i + 1
+			break
+		}
+	}
+
+	if !found {
+		return -1, fmt.Errorf("String doesn't have any command")
+	}
+
+	count := 1 // find <count> closing braces
+	for i, c := range str[start:] {
+		if c != rune('{') && c != rune('}') {
+			continue
+		}
+
+		if c == rune('{') {
+			count++
+			continue
+		}
+
+		if c == rune('}') {
+			count--
+		}
+
+		if count > 0 {
+			continue
+		}
+
+		if count == 0 {
+			return start + i + 1, nil // success
+		} else {
+			return -1, fmt.Errorf("Number of braces is mismatch! '}' is too much!")
+		}
+	}
+
+	return -1, fmt.Errorf("Number of braces is mismatch! '{' is too much!")
+}
 
 func RemoveComment(str string) string {
 	for {
@@ -20,63 +64,50 @@ func RemoveComment(str string) string {
 	return str
 }
 
-func RemoveTags(str string, tags []string) (string, error) {
-	tagsStr := strings.Join(tags, "|")
-	pattern := fmt.Sprintf(`\\(%s)(\{.*\})?(\n)?`, tagsStr)
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return "", err
+func RemoveSimpleCommands(str string, commands []string) (string, error) {
+	for _, com := range commands {
+		com = com + "{"
+		for {
+			if !strings.Contains(str, com) {
+				break
+			}
+
+			startIndex := strings.Index(str, com)
+			endIndex, err := FindCommandEnd(str[startIndex:])
+			if err != nil {
+				return "", err
+			}
+			endIndex += startIndex
+			str = str[:startIndex] + str[endIndex:]
+		}
 	}
 
-	return re.ReplaceAllString(str, ""), nil
+	return str, nil
 }
 
 func FindMacroCommandEnd(str string, command string) (int, error) {
-	cond := fmt.Sprintf("\nstr:\n'%s'\n command:\n'%s'", str, command)
 	if str[:len(command)] != command {
-		return -1, fmt.Errorf("Passed str is not started command!" + cond)
+		return -1, fmt.Errorf("Passed str is not started command!")
 	}
 
-	ignore := false
-	nBraces := 0
-	for i, c := range str {
-		if c != rune('{') && c != rune('}') {
-			continue
+	// for \newcommand, \renewcommand
+	endIndex := 0
+	if str[len(command)] == '{' {
+		firstBraceEnd, err := FindCommandEnd(str)
+		if err != nil {
+			return -1, err
 		}
-
-		if c == rune('{') {
-			if i == len(command) {
-				// first brace
-				ignore = true
-			} else {
-				nBraces++
-			}
-			continue
-		}
-
-		if c == rune('}') {
-			if ignore {
-				ignore = false
-				continue
-			}
-
-			nBraces--
-			if nBraces > 0 {
-				continue
-			} else if nBraces == 0 {
-				return i + 1, nil // success
-			} else {
-				return -1, fmt.Errorf("Number of braces is mismatch! } is too much!" + cond)
-			}
-		}
+		str = str[firstBraceEnd:]
+		endIndex += firstBraceEnd
 	}
 
-	if nBraces > 0 {
-		return -1, fmt.Errorf("Number of braces is mismatch! { is too much!" + cond)
-	} else {
-		return -1, fmt.Errorf("Brace is not found" + cond)
+	end, err := FindCommandEnd(str)
+	if err != nil {
+		return -1, err
 	}
 
+	endIndex += end
+	return endIndex, nil
 }
 
 func FindMacros(str string) ([]string, error) {

@@ -18,7 +18,7 @@
       </div>
 
       <!-- error message -->
-      <p id="error" v-if="error">
+      <p class="error" v-if="error">
         {{ error }}
       </p>
 

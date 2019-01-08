@@ -13,7 +13,7 @@ type APIError struct {
 }
 
 func newErrorWithMsg(err error, msg string) error {
-	msg += "(" + err.Error() + ")"
+	msg += " (" + err.Error() + ")"
 	return fmt.Errorf(msg)
 }
 

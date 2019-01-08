@@ -29,6 +29,28 @@ func TestRemoveComment(t *testing.T) {
 	}
 }
 
+func TestRemoveSimpleCommands(t *testing.T) {
+	input := `\label{hogehoge}
+	\hogehoge\label{aiu}
+	\label{aa\hoge{foovar}}
+	\foo{}
+	\foobar{hoge}`
+
+	actual, err := RemoveSimpleCommands(input, []string{`\label`, `\foo`})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	expected := `
+	\hogehoge
+	
+	
+	\foobar{hoge}`
+	if actual != expected {
+		t.Fatalf("\ngot  %#v\nwant %#v", actual, expected)
+	}
+}
+
 func TestFindMacros(t *testing.T) {
 	input := `hogehoge
 \def{\bmphi}{{\bm \phi}}

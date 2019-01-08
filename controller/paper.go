@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -20,6 +19,7 @@ import (
 )
 
 func readFile(path string) (string, error) {
+	fmt.Println("reading: ", path)
 	str, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -40,30 +40,42 @@ func readAllSources(mainLatexPath string, basePath string) (string, error) {
 	source = strings.Replace(source, "*{", "{", -1)
 	source = strings.Replace(source, "*}", "}", -1)
 
-	re, err := regexp.Compile(`\\(input|include)\{(.*?)\}`)
-	if err != nil {
-		return "", err
+	commands := []string{
+		`\input`,
+		`\include`,
 	}
 
-	resolveInputTag := func(s string) string {
-		path := re.FindStringSubmatch(s)[2]
-		if filepath.Ext(path) == "" {
-			path = path + ".tex"
-		}
-		_source, err := readFile(filepath.Join(basePath, path))
-		if err != nil {
-			panic(err)
-		}
-		_source = latex.RemoveComment(_source)
-		return _source
-	}
+	// replace the command with actual file content
+	for _, com := range commands {
+		com = com + "{"
+		for {
+			if !strings.Contains(source, com) {
+				break
+			}
 
-	// # TODO: improve efficiency
-	for {
-		if re.FindAllString(source, 1) == nil {
-			break
+			// find command
+			startIndex := strings.Index(source, com)
+			endIndex, err := latex.FindCommandEnd(source[startIndex:])
+			if err != nil {
+				return "", err
+			}
+			endIndex += startIndex
+
+			// read path in the brace
+			path := source[startIndex+len(com)+1 : endIndex-1]
+			if filepath.Ext(path) == "" {
+				path = path + ".tex"
+			}
+
+			// read file content
+			_source, err := readFile(filepath.Join(basePath, path))
+			if err != nil {
+				return "", err
+			}
+
+			// replace
+			source = source[:startIndex] + _source + source[endIndex:]
 		}
-		source = re.ReplaceAllStringFunc(source, resolveInputTag)
 	}
 
 	return source, nil
@@ -225,7 +237,10 @@ func FindPaper() echo.HandlerFunc {
 			// extract macros and equations
 			vars := config.Config.Variables
 			tarballDir := vars["tarballDir"]
-			_paper.readLatexSource(tarballDir)
+			err = _paper.readLatexSource(tarballDir)
+			if err != nil {
+				return err
+			}
 
 			if dbc := database.Create(&_paper); dbc.Error != nil {
 				return dbc.Error
