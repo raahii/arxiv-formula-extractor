@@ -82,8 +82,7 @@ export default {
       return true
     },
     setUrlParam: function() {
-      let parts = this.arxiv_url.split("/")
-      this.$router.push({query: {arxiv_id: parts[parts.length-1]}})
+      this.$router.push({query: {arxiv_id: this.arxiv_id}})
     },
     find_paper: function () {
       this.isLoading = true
@@ -92,8 +91,7 @@ export default {
       let self = this
       axios({
           method : 'GET',
-          url    : '/papers',
-          params : { url : self.arxiv_url }
+          url    : '/papers/' + self.arxiv_id,
         })
         .then(response => {
           self.paper = response.data.paper
@@ -107,6 +105,16 @@ export default {
           self.isLoading = false
         })
     },
+  },
+  computed: {
+    arxiv_id: function () {
+      let idStr = this.arxiv_url.slice(this.url_prefix.length)
+      let pos = idStr.indexOf("v")
+      if (pos != -1) {
+        idStr = idStr.slice(0, pos)
+      }
+      return idStr
+    }
   }
 }
 </script>
@@ -184,22 +192,6 @@ a {
     }
   }
 
-  #error {
-    font-size: 1.2em;
-    line-height: 1.5;
-    color: #a94442;
-    background-color: #f2dede;
-
-    box-sizing: border-box;
-    width: 100%;
-    padding: 15px 15px 15px 35px;
-    margin: 20px 0;
-
-    border-color: #ebccd1;
-    border: 1px solid transparent;
-    border-radius: 4px;
-  }
-  
   #result {
     width: 100%;
     margin: 20px 0;

@@ -74,7 +74,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/papers", controller.FindPaperFromUrl())
+	e.GET("/papers/:arxiv_id", controller.FindPaper())
 
 	// start
 	err := e.Start(":" + getPort())

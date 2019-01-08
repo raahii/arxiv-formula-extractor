@@ -90,12 +90,6 @@ func findSourceRoot(paths []string) (string, error) {
 	return mainPath, nil
 }
 
-func extractArxivId(arxivUrl string) string {
-	// ex) https://arxiv.org/abs/1406.2661
-	strs := strings.Split(arxivUrl, "/")
-	return strs[len(strs)-1]
-}
-
 func (paper *Paper) readLatexSource(path string) error {
 	var err error
 
@@ -213,20 +207,10 @@ func FetchPaper(arxivId string) (Paper, error) {
 	return paper, nil
 }
 
-func FindPaperFromUrl() echo.HandlerFunc {
+func FindPaper() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// obtain url from GET parameters
-		url := c.QueryParam("url")
-		if url == "" {
-			fmt.Errorf("Invalid parameters")
-		}
-
-		// remove version number from url
-		r := regexp.MustCompile(`v[1-9]+$`)
-		url = r.ReplaceAllString(url, "")
-
-		// convert paper url to id on arxiv, id on this app.
-		arxivId := extractArxivId(url)
+		arxivId := c.Param("arxiv_id")
 
 		// find the paper
 		paper := Paper{}

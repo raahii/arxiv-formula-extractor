@@ -19,8 +19,17 @@ func newErrorWithMsg(err error, msg string) error {
 
 // error handler which returns errors in json format
 func JSONErrorHandler(err error, c echo.Context) {
-	code := http.StatusInternalServerError
-	msg := err.Error()
+	var code int
+	var msg string
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+		msg = he.Message.(string)
+		// msg = string(he.Message)
+	} else {
+		code = http.StatusInternalServerError
+		msg = err.Error()
+	}
+
 	apierr := APIError{
 		code,
 		msg,
