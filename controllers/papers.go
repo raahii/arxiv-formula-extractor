@@ -255,8 +255,10 @@ func FindPaper() echo.HandlerFunc {
 		// add macro to process fine for unsupported command in mathjax
 		defaultMacros := []string{
 			`\newcommand{\bm}[1]{\boldsymbol #1}`,
+			`\newcommand{textnormal}[1]{\textrm{#1}}`,
 		}
 		paper.Macros += "\n" + strings.Join(defaultMacros, "\n")
+		fmt.Println(paper.Macros)
 
 		response := map[string]interface{}{
 			"paper": paper,

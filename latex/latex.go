@@ -153,7 +153,9 @@ func FindMacros(str string) ([]string, error) {
 		if err != nil {
 			return macros, err
 		}
-		macros = append(macros, str[startIndex:startIndex+endIndex])
+		macro := str[startIndex : startIndex+endIndex]
+		macro = strings.Replace(macro, command+"*", command, 1)
+		macros = append(macros, macro)
 		str = str[startIndex+endIndex:]
 	}
 
