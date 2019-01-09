@@ -144,12 +144,13 @@ a {
   background: #F5F5F5;
   padding: 20px 0;
   display: flex;
-  
+  flex-wrap: wrap;
+
   #dummy {
-    flex: 33%;
+    flex: 15%;
   }
   #title {
-    flex: 34%;
+    flex: 60%;
     display: inline-flex;
     flex-direction: column;
     margin: 10px 0;
@@ -167,17 +168,32 @@ a {
     }
   }
   #sns_icons {
-    flex: 33%;
+    flex: 25%;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-
     #github {
-      height: 32px;
-      width: 32px;
+      height: 24px;
+      width: 24px;
       border-radius: 50%;
       box-shadow: 0 6px 12px -2px rgba(107, 117, 161, 0.16);
+    }
+  }
+  
+  @media screen and (min-width:700px) { 
+    #dummy {
+      flex: 33%;
+    }
+    #title {
+      flex: 34%;
+    }
+    #sns_icons {
+      flex: 33%;
+      #github {
+        height: 32px;
+        width: 32px;
+      }
     }
   }
 }
