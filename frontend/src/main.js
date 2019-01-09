@@ -6,13 +6,9 @@ import router from './router'
 import VueClipboard from 'vue-clipboard2'
 import VueMathjax from 'vue-mathjax'
 import axios from 'axios'
-import VueAnalytics from 'vue-analytics'
 
 Vue.use(VueClipboard)
 Vue.use(VueMathjax)
-Vue.use(VueAnalytics, {
-  id: 'UA-86522604-5'
-})
 
 Vue.config.productionTip = false
 axios.defaults.baseURL = process.env.BACKEND_URL;

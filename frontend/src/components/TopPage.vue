@@ -166,9 +166,12 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
+
     #github {
       height: 32px;
       width: 32px;
+      border-radius: 50%;
+      box-shadow: 0 6px 12px -2px rgba(107, 117, 161, 0.16);
     }
   }
 }

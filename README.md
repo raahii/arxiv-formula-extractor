@@ -1,29 +1,16 @@
 # Arxiv Equations
 
-
+![](https://user-images.githubusercontent.com/13511520/50848768-70ddb900-13b8-11e9-9c17-d18f5791ac5f.png)
 
 [Arxiv Equations](https://arxiv-equations.netlify.com/) provides latex format equations from arxiv paper.
 
 This app is made with `Golang`, `Vue.js` and `MySQL`.
 
-
-
-![](https://user-images.githubusercontent.com/13511520/50848768-70ddb900-13b8-11e9-9c17-d18f5791ac5f.png)
-
-
-
 ## Requirement
 
 - Golang 
-
-  - [dep](https://github.com/golang/dep)
-
-    ```shell
-    go get -u github.com/golang/dep/cmd/dep
-    ```
-
+  - [dep](https://github.com/golang/dep), `go get -u github.com/golang/dep/cmd/dep`
 - npm
-
 - mysql 
 
 ## Getting Started
@@ -43,31 +30,35 @@ export BACKEND_BASEURL=<backend url, ex)http://localhost:1323">
 
 ### Install dependencies
 
-- backend
+```shell
+# backend 
+dep ensure
 
-  ```shell
-  dep ensure
-  ```
-
-- frontend
-
-  ```shell
-  cd frontend
-  npm install --save
-  ```
+# frontend 
+cd frontend; npm install --save
+```
 
 ### Start development
 
-- backend server
 
-  ```shell
-  go run server.go
-  ```
+```shell
+# backend 
+go run server.go
 
-- frontend 
+# frontend 
+cd frontend; npm run dev
+```
 
-- ```shell
-  cd frontend
-  npm run dev
-  ```
+## TODO:
 
+- [ ] remove vue router
+
+- [ ] updating paper function
+
+- [ ] exclusive processing for pasing latex source
+
+- [ ] accurate tex parsing (by using pandoc or something)
+
+- [ ] obtain number of equation
+
+- [ ] obtain number of equation

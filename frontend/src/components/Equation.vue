@@ -1,12 +1,15 @@
 <template>
-  <div class="equation card">
+  <div v-on:mouseleave="onMouseLeave" class="equation card">
     <vue-mathjax 
       class="expression" 
       :formula="mathExp"
       v-clipboard:copy="obj.expression"
       v-clipboard:success="onCopy"
       v-clipboard:error="onError"></vue-mathjax>
-    <p class="balloon">copy</p>
+    <p class="copy_label">
+    <span v-show="copy"><i class="far fa-clipboard"></i>copy</span>
+    <span v-show="!copy"><i class="fas fa-check"></i>copied</span>
+    </p>
   </div>
 </template>
 
@@ -18,16 +21,23 @@ export default {
   components: {
    'vue-mathjax': VueMathjax
   },
+  data () {
+    return {
+      copy: true,
+    }
+  },
   props: ['obj'],
   mounted: function () {
-    // console.info(this.mathExp)
   },
   methods: {
     onCopy: function (e) {
-      // console.info('You just copied: ' + e.text)
+      this.copy = false
     },
     onError: function (e) {
-      // console.info('Failed to copy texts')
+      console.error("copy error")
+    },
+    onMouseLeave: function (e) {
+      this.copy = true
     }
   },
   computed: {
@@ -38,6 +48,13 @@ export default {
       exp += String.raw`\end{eqnarray}`
       return exp
     },
+    labelText: function () {
+      if (this.copy) {
+        return "copy"
+      } else {
+        return "copied!"
+      }
+    }
   }
 }
 </script>
@@ -50,7 +67,11 @@ export default {
   position: relative;
 }
 
-.balloon {
+.copy_label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   visibility: hidden;
   opacity: 0;
   transition: .3s linear;
@@ -62,8 +83,6 @@ export default {
   padding: 0 5px;
   margin: 0;
 
-  color: #797C86;
-  font-size: 13px;
   outline: none;
   border-top: none;
   border-right: none;
@@ -71,6 +90,24 @@ export default {
   border-bottom: solid 1px #D1D7E3;
   line-height: 24px;
   box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
+
+  i {
+    margin-right: 4px;
+    color: #797C86;
+  }
+
+  .fa-clipboard {
+    font-size: 15px;
+  }
+
+  .fa-check {
+    font-size: 13px;
+    color: #42b983;
+  }
+
+  span {
+    font-size: 14px;
+  }
 }
 
 .card {
@@ -85,7 +122,7 @@ export default {
   box-shadow: 0 5px 5px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
 }
 
-.card:hover .balloon {
+.card:hover .copy_label {
   visibility: visible;
   opacity: 1;
 }
