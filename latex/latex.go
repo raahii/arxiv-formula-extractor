@@ -167,15 +167,17 @@ func FindEquations(str string) ([]string, error) {
 		`aligned`,
 		`eqnarray`,
 		`array`,
+		`subequations`,
 	}
 
 	equations := []string{}
 	for {
+		// find command position
 		command := ""
 		startIndex := len(str)
 		for _, _command := range commands {
-			commandStart := fmt.Sprintf("\\begin{%s", _command)
-			if _pos := strings.Index(str, commandStart); _pos != -1 {
+			startCommand := fmt.Sprintf(`\begin{%s}`, _command)
+			if _pos := strings.Index(str, startCommand); _pos != -1 {
 				if _pos < startIndex {
 					startIndex = _pos
 					command = _command
@@ -188,52 +190,71 @@ func FindEquations(str string) ([]string, error) {
 			break
 		}
 
+		// find equation string
+		// ex)
+		//     \begin{equation}
+		//      [here]
+		//     \end{equation}
+
 		// find end of command opening
-		flag := false
-		for i, c := range str[startIndex:] {
-			if flag {
-				startIndex += i
-				break
-			}
-			if c == rune('\n') {
-				flag = true
-			}
+		endIndex, err := FindCommandEnd(str[startIndex:])
+		if err != nil {
+			return []string{""}, err
 		}
-		str = str[startIndex:]
+		endIndex += startIndex
+		str = str[endIndex:]
 
 		// find end of command closing
-		commandEnd := fmt.Sprintf("\\end{%s", command)
-		endIndex := strings.Index(str, commandEnd)
-		if endIndex == -1 {
+		endCommand := fmt.Sprintf("\\end{%s", command)
+		startIndex = strings.Index(str, endCommand)
+		if startIndex == -1 {
 			return nil, fmt.Errorf("Corresponding end command is not found!, %s\n%v", command, equations)
 		}
+		equation := str[:startIndex]
+
+		endIndex, err = FindCommandEnd(str[startIndex:])
+		if err != nil {
+			return []string{""}, err
+		}
+		endIndex += startIndex
+		str = str[endIndex:]
+
+		// remove nested command if exists
+		// ex)
+		//    \begin{equation}
+		//     \begin{align} <- remove
+		//       ...
+		//     \end{align}   <- remove
+		//    \end{equation
 
 		// check nested command exists
-		equation := str[:endIndex]
-		var s, e int
 		for _, command := range commands {
-			if !strings.Contains(equation, command) {
+			startCommand := fmt.Sprintf("\\begin{%s", command)
+			if !strings.Contains(equation, startCommand) {
 				continue
 			}
+
 			// remove command start
-			startCommand := fmt.Sprintf("\\begin{%s", command)
-			s = strings.Index(equation, startCommand)
-			e = s + strings.Index(equation[s:], "\n")
-			equation = equation[:s] + equation[e:]
+			startIndex = strings.Index(equation, startCommand)
+			endIndex, err := FindCommandEnd(equation[startIndex:])
+			if err != nil {
+				return []string{""}, err
+			}
+			endIndex += startIndex
+			equation = equation[:startIndex] + equation[endIndex:]
 
 			// remove command end
 			endCommand := fmt.Sprintf("\\end{%s", command)
-			s = strings.Index(equation, endCommand)
-			e = s + strings.Index(equation[s:], "\n")
-			if e == -1 {
-				equation = equation[:s]
-			} else {
-				equation = equation[:s] + equation[e:]
+			startIndex = strings.Index(equation, endCommand)
+			endIndex, err = FindCommandEnd(equation[startIndex:])
+			if err != nil {
+				return []string{""}, err
 			}
+			endIndex += startIndex
+			equation = equation[:startIndex] + equation[endIndex:]
 		}
 		equation = strings.Trim(equation, "\n\t ")
 		equations = append(equations, equation)
-		str = str[endIndex:]
 	}
 
 	return equations, nil

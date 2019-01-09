@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -19,7 +18,6 @@ import (
 )
 
 func readFile(path string) (string, error) {
-	fmt.Println("reading: ", path)
 	str, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -140,8 +138,12 @@ func (paper *Paper) readLatexSource(path string) error {
 		return newErrorWithMsg(err, "Error occurred during processing tex files(3)")
 	}
 
+	allSource, err = latex.RemoveSimpleCommands(allSource, []string{`\label`})
+	if err != nil {
+		return newErrorWithMsg(err, "Error occurred during removing unnecessary commands")
+	}
+
 	// obtain macros
-	log.Println("Extracting macros")
 	macros, err := latex.FindMacros(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting macros")
@@ -149,11 +151,11 @@ func (paper *Paper) readLatexSource(path string) error {
 	paper.Macros = strings.Join(macros, "\n")
 
 	// obtain equations
-	log.Println("Extracting equations")
 	equationStrs, err := latex.FindEquations(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting equations")
 	}
+
 	equations := []Equation{}
 	for _, str := range equationStrs {
 		eq := Equation{}
