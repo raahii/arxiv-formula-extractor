@@ -4,18 +4,18 @@
     <div id="header">
       <div id="dummy"></div>
       <div id="title">
-        <a id="main_title" href="/">{{ service_name }}</a>
+        <a id="main_title" href="/">{{ serviceName }}</a>
         <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
       </div>
       <div id="sns_icons">
-        <a :href="github_url" target="_blank"><img id="github" src="/static/github.png"></a>
+        <a :href="githubUrl" target="_blank"><img id="github" src="/static/github.png"></a>
       </div>
     </div>
   
     <div id="main">
       <!--  search box -->
       <div id="search_box">
-        <input v-model="arxiv_url" placeholder="https://arxiv.org/abs/...">
+        <input v-model="arxivUrl" placeholder="https://arxiv.org/abs/...">
         <button v-on:click="search" v-bind:disabled="isLoading">Go</button>
       </div>
 
@@ -33,7 +33,7 @@
 
     <!-- footer -->
     <div id="footer">
-      {{ service_name }} by <a :href="author_url" target="_blank">{{ author_name }}</a>
+      {{ serviceName }} by <a :href="authorUrl" target="_blank">{{ authorName }}</a>
     </div>
   </div>
 </template>
@@ -51,50 +51,60 @@ export default {
   },
   data () {
     return {
-      service_name: 'Arxiv Equations',
-      service_url: 'http://localhost:8000',
-      author_name: 'raahii',
-      author_url: 'https://raahii.github.io/about/',
-      url_prefix: "https://arxiv.org/abs/",
-      github_url: "https://github.com/raahii/arxiv-equations",
-      arxiv_url: '',
+      serviceName: 'Arxiv Equations',
+      serviceUrl: 'http://localhost:8000',
+      authorName: 'raahii',
+      authorUrl: 'https://raahii.github.io/about/',
+      baseUrl: "https://arxiv.org/abs/",
+      githubUrl: "https://github.com/raahii/arxiv-equations",
+
+      baseUrl: "https://arxiv.org/abs/",
+      regex: new RegExp("https?://arxiv.org/abs/([0-9.]+)(v[0-9]+)?$"),
+
+      arxivUrl: '',
       paper: null,
       error: null,
       isLoading: false,
     }
   },
   mounted: function() {
-    var arxiv_id = this.$route.query.arxiv_id
-    if (arxiv_id) {
-      this.arxiv_url = this.url_prefix + arxiv_id
-      this.find_paper()
+    var arxivId = this.$route.query.arxiv_id
+    if (arxivId) {
+      this.arxivUrl = this.baseUrl + arxivId
+      this.search()
     }
   },
   methods: {
     search: function(e) {
       this.error = null
-      if (this.checkUrl(e)) {
-        this.find_paper()
+      if (this.checkUrl()) {
+        this.findPaper()
       }
     },
     checkUrl: function () {
-      if (this.arxiv_url.indexOf(this.url_prefix) != 0) {
-        this.error = "The url must start 'https://arxiv.org/abs/'"
+      let m = this.arxivUrl.match(this.regex)
+      if (m === null) {
+        if (this.arxivUrl.indexOf(this.baseUrl) == -1) {
+          this.error = "The url must start 'https://arxiv.org/abs/'"
+        }  else {
+          this.error = "Invalid arxiv url."
+        }
         return false
       }
+      
       return true
     },
     setUrlParam: function() {
-      this.$router.push({query: {arxiv_id: this.arxiv_id}})
+      this.$router.push({query: {arxiv_id: this.arxivId}})
     },
-    find_paper: function () {
+    findPaper: function () {
       this.isLoading = true
       this.paper = null
       
       let self = this
       axios({
           method : 'GET',
-          url    : '/papers/' + self.arxiv_id,
+          url    : '/papers/' + self.arxivId,
         })
         .then(response => {
           self.paper = response.data.paper
@@ -110,13 +120,9 @@ export default {
     },
   },
   computed: {
-    arxiv_id: function () {
-      let idStr = this.arxiv_url.slice(this.url_prefix.length)
-      let pos = idStr.indexOf("v")
-      if (pos != -1) {
-        idStr = idStr.slice(0, pos)
-      }
-      return idStr
+    arxivId: function () {
+      let m = this.arxivUrl.match(this.regex)
+      return m[1]
     }
   }
 }

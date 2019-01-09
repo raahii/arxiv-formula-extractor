@@ -12,9 +12,6 @@ export default {
   components: {
    'vue-mathjax': VueMathjax
   },
-  mounted: function () {
-    console.info("macro:", this.macroExp)
-  },
   props: ['macroString'],
   computed: {
     macroExp: function () {

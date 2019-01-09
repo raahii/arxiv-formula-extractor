@@ -24,8 +24,8 @@ go get github.com/raahii/arxiv-equations
 ```
 export DB_USER=<user>
 export DB_PASS=<password>
-export DB_NAME=<dbname, ex)arxiv_equations>
-export BACKEND_BASEURL=<backend url, ex)http://localhost:1323">
+export DB_NAME=<dbname, ex.arxiv_equations>
+export BACKEND_BASEURL=<backend url, ex.http://localhost:1323">
 ```
 
 ### Install dependencies
@@ -50,6 +50,8 @@ cd frontend; npm run dev
 ```
 
 ## TODO:
+
+- [ ] copy macro button
 
 - [ ] removing vue router
 
