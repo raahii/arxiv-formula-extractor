@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -26,7 +24,27 @@ func readFile(path string) (string, error) {
 	return string(str), nil
 }
 
-func readAllSources(mainLatexPath string, basePath string) (string, error) {
+func findSourceRoot(paths []string) ([]string, error) {
+	// search source which includes '\documentclass'
+	candidates := []string{}
+	for _, path := range paths {
+		source, err := readFile(path)
+		if err != nil {
+			return []string{}, err
+		}
+		source = latex.RemoveComment(source)
+		if strings.Contains(source, `\documentclass`) {
+			candidates = append(candidates, path)
+		}
+	}
+	if len(candidates) > 0 {
+		return candidates, nil
+	} else {
+		return []string{}, fmt.Errorf("Root latex file is not found")
+	}
+}
+
+func resolveInputs(mainLatexPath string, basePath string) (string, error) {
 	// read all \input or \include tag and
 	// obtain all related sources concatenated string
 	source, err := readFile(mainLatexPath)
@@ -60,7 +78,7 @@ func readAllSources(mainLatexPath string, basePath string) (string, error) {
 			endIndex += startIndex
 
 			// read path in the brace
-			path := source[startIndex+len(com)+1 : endIndex-1]
+			path := source[startIndex+len(com) : endIndex-1]
 			if filepath.Ext(path) == "" {
 				path = path + ".tex"
 			}
@@ -79,61 +97,71 @@ func readAllSources(mainLatexPath string, basePath string) (string, error) {
 	return source, nil
 }
 
-func findSourceRoot(paths []string) (string, error) {
-	// search source which includes '\documentclass'
-	found := false
-	mainPath := ""
-	for _, path := range paths {
-		source, err := readFile(path)
+func readAllSources(latexFiles []string, basePath string) (string, error) {
+	// find candidates for the root latex file
+	rootFiles, err := findSourceRoot(latexFiles)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(rootFiles)
+
+	// resolve \input, \include commands for each root file
+	allSources := []string{}
+	for _, rootFile := range rootFiles {
+		fmt.Println(rootFile)
+		source, err := resolveInputs(rootFile, basePath)
 		if err != nil {
 			return "", err
 		}
-		source = latex.RemoveComment(source)
-		if strings.Contains(source, `\documentclass`) {
-			found = true
-			mainPath = path
+		allSources = append(allSources, source)
+	}
+
+	// if one candidate found, return the source
+	if len(allSources) == 1 {
+		return allSources[0], nil
+	}
+
+	// if multiple candiates found, the most longest source is
+	// thought to be main latex file...
+	longestSource := ""
+	for _, source := range allSources {
+		if len(source) > len(longestSource) {
+			longestSource = source
 		}
 	}
-	if !found {
-		return "", fmt.Errorf("Latex file is not found")
-	}
-	return mainPath, nil
+	return longestSource, nil
 }
 
 func (paper *Paper) readLatexSource(path string) error {
 	var err error
 
-	// download tarball
-	tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
-	err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
-	if err != nil {
-		return newErrorWithMsg(err, "Error occured during downloading tarball")
-	}
+	// // download tarball
+	// tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
+	// err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
+	// if err != nil {
+	// 	return newErrorWithMsg(err, "Error occured during downloading tarball")
+	// }
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, paper.ArxivId)
-	os.Mkdir(sourcePath, 0777)
-
-	err = exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
-	if err != nil {
-		return newErrorWithMsg(err, "Error occured during decompressing tarball.")
-	}
+	// os.Mkdir(sourcePath, 0777)
+	//
+	// err = exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
+	// if err != nil {
+	// 	return newErrorWithMsg(err, "Error occured during decompressing tarball.")
+	// }
 
 	// list all *.tex
+	fmt.Println("list")
 	pattern := filepath.Join(sourcePath, "**/*.tex")
 	files, err := zglob.Glob(pattern)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during processing tex files(1)")
 	}
 
-	// find root latex source file
-	rootFile, err := findSourceRoot(files)
-	if err != nil {
-		return newErrorWithMsg(err, "Error occurred during processing tex files(2)")
-	}
-
 	// obtain all latex source
-	allSource, err := readAllSources(rootFile, sourcePath)
+	fmt.Println("all")
+	allSource, err := readAllSources(files, sourcePath)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during processing tex files(3)")
 	}
@@ -144,6 +172,7 @@ func (paper *Paper) readLatexSource(path string) error {
 	}
 
 	// obtain macros
+	fmt.Println("macro")
 	macros, err := latex.FindMacros(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting macros")
@@ -151,6 +180,7 @@ func (paper *Paper) readLatexSource(path string) error {
 	paper.Macros = strings.Join(macros, "\n")
 
 	// obtain equations
+	fmt.Println("eq")
 	equationStrs, err := latex.FindEquations(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting equations")
@@ -164,13 +194,9 @@ func (paper *Paper) readLatexSource(path string) error {
 	}
 	paper.Equations = equations
 
-	// remove tarball
-	if err := os.Remove(tarballPath); err != nil {
-		return err
-	}
-	if err := os.RemoveAll(sourcePath); err != nil {
-		return err
-	}
+	// // remove tarball
+	// os.Remove(tarballPath)
+	// os.RemoveAll(sourcePath)
 
 	return nil
 }
@@ -244,9 +270,9 @@ func FindPaper() echo.HandlerFunc {
 				return err
 			}
 
-			if dbc := database.Create(&_paper); dbc.Error != nil {
-				return dbc.Error
-			}
+			// if dbc := database.Create(&_paper); dbc.Error != nil {
+			// 	return dbc.Error
+			// }
 			paper = _paper
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
@@ -258,7 +284,6 @@ func FindPaper() echo.HandlerFunc {
 			`\newcommand{textnormal}[1]{\textrm{#1}}`,
 		}
 		paper.Macros += "\n" + strings.Join(defaultMacros, "\n")
-		fmt.Println(paper.Macros)
 
 		response := map[string]interface{}{
 			"paper": paper,

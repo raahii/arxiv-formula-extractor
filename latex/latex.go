@@ -51,14 +51,20 @@ func FindCommandEnd(str string) (int, error) {
 }
 
 func RemoveComment(str string) string {
+	str = strings.Replace(str, "%\n", "", -1)
+
 	for {
 		if !strings.Contains(str, "%") {
 			break
 		}
 
 		startIndex := strings.Index(str, "%")
-		endIndex := startIndex + strings.Index(str[startIndex:], "\n")
-		str = str[:startIndex] + str[endIndex:]
+		endIndex := strings.Index(str[startIndex:], "\n")
+		if endIndex > 0 {
+			str = str[:startIndex] + str[startIndex+endIndex:]
+		} else {
+			str = str[:startIndex]
+		}
 	}
 
 	return str
