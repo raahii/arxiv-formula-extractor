@@ -3,14 +3,13 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/raahii/arxiv-equations/config"
-	"github.com/raahii/arxiv-equations/controller"
+	"github.com/raahii/arxiv-equations/controllers"
 	"github.com/raahii/arxiv-equations/db"
 )
 
@@ -26,9 +25,9 @@ func getPort() string {
 func initApp(db *gorm.DB) {
 	// Create tables
 	models := []interface{}{
-		&controller.Paper{},
-		&controller.Equation{},
-		&controller.Author{},
+		&controllers.Paper{},
+		&controllers.Equation{},
+		&controllers.Author{},
 	}
 	for _, model := range models {
 		db.AutoMigrate(model)
@@ -68,13 +67,10 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// error handler
-	e.HTTPErrorHandler = controller.JSONErrorHandler
+	e.HTTPErrorHandler = controllers.JSONErrorHandler
 
 	// routing
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-	e.GET("/papers/:arxiv_id", controller.FindPaper())
+	e.GET("/papers/:arxiv_id", controllers.FindPaper())
 
 	// start
 	err := e.Start(":" + getPort())

@@ -51,14 +51,14 @@ cd frontend; npm run dev
 
 ## TODO:
 
-- [ ] remove vue router
+- [ ] removing vue router
 
-- [ ] updating paper function
+- [ ] add updating paper api
 
 - [ ] exclusive processing for pasing latex source
 
-- [ ] accurate tex parsing (by using pandoc or something)
+- [ ] accurate tex source parsing (by using pandoc or something)
 
-- [ ] obtain number of equation
+- [ ] extract equation number
 
-- [ ] obtain number of equation
+- [ ] separate controllers and models properly
