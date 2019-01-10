@@ -1,5 +1,5 @@
 <template>
-  <div class="top_page">
+  <div id="top_page">
     <!-- header -->
     <div id="header">
       <div id="dummy"></div>
@@ -138,9 +138,17 @@ p {
 a {
   color: #42b983;
 }
+#top_page {
+  height: 100%
+}
+
+$header-height: 120px;
+$footer-height: 70px;
+
 #header {
   width: 100%;
-  height: auto;
+  box-sizing: border-box;
+  height: $header-height;
   background: #F5F5F5;
   padding: 20px 0;
   display: flex;
@@ -198,10 +206,13 @@ a {
   }
 }
 #main {
-  min-height: 100vh;
-  height: 100%;
-  margin: 40px auto 0;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding-top: 40px;
+  min-height: calc(100% - #{$header-height} - #{$footer-height});
+;
 
+  height: auto;
   width: 90%;
   @media screen and (min-width:700px) { 
     width: 80%;
@@ -283,10 +294,9 @@ a {
 
 #footer {
   box-sizing: border-box;
-  height: 100px;
+  height: $footer-height;
   background: #F5F5F5;
-  padding-top: 45px;
+  padding-top: 25px;
   text-align: center;
-  margin-top: 30px;
 }
 </style>
