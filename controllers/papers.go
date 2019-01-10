@@ -267,9 +267,9 @@ func FindPaper() echo.HandlerFunc {
 				return err
 			}
 
-			// if dbc := database.Create(&_paper); dbc.Error != nil {
-			// 	return dbc.Error
-			// }
+			if dbc := database.Create(&_paper); dbc.Error != nil {
+				return dbc.Error
+			}
 			paper = _paper
 		} else {
 			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
