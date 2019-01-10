@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -71,11 +73,10 @@ func resolveInputs(mainLatexPath string, basePath string) (string, error) {
 
 			// find command
 			startIndex := strings.Index(source, com)
-			endIndex, err := latex.FindCommandEnd(source[startIndex:])
+			endIndex, err := latex.FindEndOfOneLineCommand(source, startIndex)
 			if err != nil {
 				return "", err
 			}
-			endIndex += startIndex
 
 			// read path in the brace
 			path := source[startIndex+len(com) : endIndex-1]
@@ -103,12 +104,10 @@ func readAllSources(latexFiles []string, basePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(rootFiles)
 
 	// resolve \input, \include commands for each root file
 	allSources := []string{}
 	for _, rootFile := range rootFiles {
-		fmt.Println(rootFile)
 		source, err := resolveInputs(rootFile, basePath)
 		if err != nil {
 			return "", err
@@ -135,24 +134,23 @@ func readAllSources(latexFiles []string, basePath string) (string, error) {
 func (paper *Paper) readLatexSource(path string) error {
 	var err error
 
-	// // download tarball
-	// tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
-	// err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
-	// if err != nil {
-	// 	return newErrorWithMsg(err, "Error occured during downloading tarball")
-	// }
+	// download tarball
+	tarballPath := filepath.Join(path, paper.ArxivId+".tar.gz")
+	err = arxiv.DownloadTarball(paper.TarballUrl, tarballPath)
+	if err != nil {
+		return newErrorWithMsg(err, "Error occured during downloading tarball")
+	}
 
 	// decompress tarball
 	sourcePath := filepath.Join(path, paper.ArxivId)
-	// os.Mkdir(sourcePath, 0777)
-	//
-	// err = exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
-	// if err != nil {
-	// 	return newErrorWithMsg(err, "Error occured during decompressing tarball.")
-	// }
+	os.Mkdir(sourcePath, 0777)
+
+	err = exec.Command("tar", "-xvzf", tarballPath, "-C", sourcePath).Run()
+	if err != nil {
+		return newErrorWithMsg(err, "Error occured during decompressing tarball.")
+	}
 
 	// list all *.tex
-	fmt.Println("list")
 	pattern := filepath.Join(sourcePath, "**/*.tex")
 	files, err := zglob.Glob(pattern)
 	if err != nil {
@@ -160,27 +158,26 @@ func (paper *Paper) readLatexSource(path string) error {
 	}
 
 	// obtain all latex source
-	fmt.Println("all")
 	allSource, err := readAllSources(files, sourcePath)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during processing tex files(3)")
 	}
 
-	allSource, err = latex.RemoveSimpleCommands(allSource, []string{`\label`})
+	// remove comment and \label command
+	allSource = latex.RemoveComment(allSource)
+	allSource, err = latex.RemoveOneLineCommands(allSource, []string{`\label`})
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during removing unnecessary commands")
 	}
 
 	// obtain macros
-	fmt.Println("macro")
-	macros, err := latex.FindMacros(allSource)
+	macros, err := latex.FindMacroCommands(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting macros")
 	}
 	paper.Macros = strings.Join(macros, "\n")
 
 	// obtain equations
-	fmt.Println("eq")
 	equationStrs, err := latex.FindEquations(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting equations")
@@ -194,9 +191,9 @@ func (paper *Paper) readLatexSource(path string) error {
 	}
 	paper.Equations = equations
 
-	// // remove tarball
-	// os.Remove(tarballPath)
-	// os.RemoveAll(sourcePath)
+	// remove tarball
+	os.Remove(tarballPath)
+	os.RemoveAll(sourcePath)
 
 	return nil
 }
