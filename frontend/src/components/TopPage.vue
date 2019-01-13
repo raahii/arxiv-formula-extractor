@@ -3,9 +3,7 @@
     <!-- header -->
     <div id="header">
       <div id="dummy"></div>
-      <div id="title">
-        <a id="main_title" href="/">{{ serviceName }}</a>
-        <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
+      <div id="title"> <a id="main_title" href="/">{{ serviceName }}</a> <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
       </div>
       <div id="sns_icons">
         <a :href="githubUrl" target="_blank"><img id="github" src="/static/github.png"></a>
@@ -27,7 +25,7 @@
       <!-- rendering paper -->
       <div id="result">
         <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
-        <paper v-bind:obj="paper" v-if="paper && !isLoading"></paper>
+        <paper :obj="paper" v-if="paper && !isLoading"></paper>
       </div>
     </div>
 

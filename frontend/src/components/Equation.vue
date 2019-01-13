@@ -3,7 +3,7 @@
     <vue-mathjax 
       class="expression" 
       :formula="mathExp"
-      v-clipboard:copy="obj.expression"
+      v-clipboard:copy="expressionWithMacros"
       v-clipboard:success="onCopy"
       v-clipboard:error="onError"></vue-mathjax>
     <p class="copy_label">
@@ -26,7 +26,7 @@ export default {
       copy: true,
     }
   },
-  props: ['obj'],
+  props: ['eq', 'macros'],
   mounted: function () {
   },
   methods: {
@@ -44,9 +44,19 @@ export default {
     mathExp: function () {
       let exp;
       exp  = String.raw`\begin{eqnarray}`
-      exp += this.obj.expression
+      exp += this.eq.expression
       exp += String.raw`\end{eqnarray}`
       return exp
+    },
+    expressionWithMacros: function () {
+      let macroString = ""
+      for(let macro of this.macros) {
+        if (this.eq.expression.indexOf(macro.command) >= 0) {
+          macroString += macro.expression + "\n"
+        }
+      }
+
+      return macroString + this.eq.expression
     },
     labelText: function () {
       if (this.copy) {

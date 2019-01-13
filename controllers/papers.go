@@ -26,6 +26,13 @@ func readFile(path string) (string, error) {
 	return string(str), nil
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func findSourceRoot(paths []string) ([]string, error) {
 	// search source which includes '\documentclass'
 	candidates := []string{}
@@ -171,11 +178,27 @@ func (paper *Paper) readLatexSource(path string) error {
 	}
 
 	// obtain macros
-	macros, err := latex.FindMacroCommands(allSource)
+	macroStrs, err := latex.FindMacroCommands(allSource)
 	if err != nil {
 		return newErrorWithMsg(err, "Error occurred during extracting macros")
 	}
-	paper.Macros = strings.Join(macros, "\n")
+	macros := []Macro{}
+	for _, str := range macroStrs {
+		s := 3 + strings.Index(str[3:], `\`)
+		e := len(str)
+		for _, c := range []string{` `, `}`, `{`, `[`} {
+			if strings.Contains(str, c) {
+				e = min(s+strings.Index(str[s:], c), e)
+			}
+		}
+		command := str[s:e]
+
+		macro := Macro{}
+		macro.Command = command
+		macro.Expression = str
+		macros = append(macros, macro)
+	}
+	paper.Macros = macros
 
 	// obtain equations
 	equationStrs, err := latex.FindEquations(allSource)
@@ -272,15 +295,10 @@ func FindPaper() echo.HandlerFunc {
 			}
 			paper = _paper
 		} else {
-			database.Model(&paper).Related(&paper.Equations).Related(&paper.Authors)
+			database.Model(&paper).Related(&paper.Equations)
+			database.Model(&paper).Related(&paper.Authors)
+			database.Model(&paper).Related(&paper.Macros)
 		}
-
-		// add macro to process fine for unsupported command in mathjax
-		defaultMacros := []string{
-			`\newcommand{\bm}[1]{\boldsymbol #1}`,
-			`\newcommand{textnormal}[1]{\textrm{#1}}`,
-		}
-		paper.Macros += "\n" + strings.Join(defaultMacros, "\n")
 
 		response := map[string]interface{}{
 			"paper": paper,

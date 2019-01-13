@@ -12,13 +12,22 @@ export default {
   components: {
    'vue-mathjax': VueMathjax
   },
-  props: ['macroString'],
+  props: ['macros'],
+  data()  {
+    return {
+      "defaultMacros": [
+        "\\newcommand{\\bm}[1]{\\boldsymbol #1}",
+        "\\newcommand{textnormal}[1]{\\textrm{#1}}",
+      ],
+    }
+  },
   computed: {
     macroExp: function () {
       let exp
       exp  = String.raw`\\(` + "\n"
-      exp += this.macroString
-      exp += "\n" + String.raw`\\)`
+      exp += this.defaultMacros.join("\n") + "\n"
+      exp += this.macros.map(m => m.expression).join("\n") + "\n"
+      exp += String.raw`\\)`
       return exp
     }
   }

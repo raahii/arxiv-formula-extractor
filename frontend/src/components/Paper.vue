@@ -8,8 +8,8 @@
     </div>
     <div class="paper_equations">
       <p class="n_hits success"> {{ this.obj.equations.length }} equations found.</p>
-      <macro :macroString="obj.macros"></macro>
-      <equation :obj="eq" :key="eq.arxiv_id" v-for="eq in obj.equations" ></equation>
+      <macro :macros="obj.macros"></macro>
+      <equation :eq="eq" :macros="obj.macros" :key="eq.arxiv_id" v-for="eq in obj.equations" ></equation>
     </div>
   </div>
 </template>

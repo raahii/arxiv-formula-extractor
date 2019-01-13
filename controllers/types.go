@@ -19,12 +19,22 @@ type Paper struct {
 	Abstract   string     `json:"abstract" gorm:"not null;type:text"`
 	AbsUrl     string     `json:"url" gorm:"not null"`
 	TarballUrl string     `json:"tarball_url" gorm:"not null"`
-	Macros     string     `json:"macros" gorm:"type:text"`
+	Macros     []Macro    `json:"macros" gorm:"association_save_reference:true;foreignkey:PaperID"`
 	Equations  []Equation `json:"equations" gorm:"association_save_reference:true;foreignkey:PaperID"`
 }
 
 func (Paper) TableName() string {
 	return "papers"
+}
+
+type Macro struct {
+	Expression string `json:"expression" gorm:"not null;type:varchar(2000)"`
+	Command    string `json:"command" gorm:"not null;type:varchar(100)"`
+	PaperID    uint   `json:"paper_id" gorm:"not null"`
+}
+
+func (Macro) TableName() string {
+	return "macros"
 }
 
 type Author struct {
