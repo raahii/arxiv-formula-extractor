@@ -28,6 +28,7 @@ func initApp(db *gorm.DB) {
 		&controllers.Paper{},
 		&controllers.Equation{},
 		&controllers.Author{},
+		&controllers.Macro{},
 	}
 	for _, model := range models {
 		db.AutoMigrate(model)
