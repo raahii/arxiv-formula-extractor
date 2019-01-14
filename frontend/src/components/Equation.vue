@@ -2,8 +2,8 @@
   <div v-on:mouseleave="onMouseLeave" class="equation card">
     <vue-mathjax 
       class="expression" 
-      :formula="mathExp"
-      v-clipboard:copy="expressionWithMacros"
+      :formula="renderExpression"
+      v-clipboard:copy="copyExpression"
       v-clipboard:success="onCopy"
       v-clipboard:error="onError"></vue-mathjax>
     <p class="copy_label">
@@ -27,8 +27,6 @@ export default {
     }
   },
   props: ['eq', 'macros'],
-  mounted: function () {
-  },
   methods: {
     onCopy: function (e) {
       this.copy = false
@@ -41,22 +39,19 @@ export default {
     }
   },
   computed: {
-    mathExp: function () {
-      let exp;
-      exp  = String.raw`$$ \begin{align}`
-      exp += this.eq.expression
+    renderExpression: function () {
+      let exp = ""
+      exp += String.raw`$$ \begin{align}` + "\n"
+      exp += this.eq.expression + "\n"
       exp += String.raw`\end{align} $$`
       return exp
     },
-    expressionWithMacros: function () {
-      let macroString = ""
-      for(let macro of this.macros) {
-        if (this.eq.expression.indexOf(macro.command) >= 0) {
-          macroString += macro.expression + "\n"
-        }
-      }
+    copyExpression: function () {
+      let exp = ""
+      exp += this.macros.map(m=>m.expression).join("\n") + "\n\n"
+      exp += this.eq.expression
 
-      return macroString + this.eq.expression
+      return  exp
     },
     labelText: function () {
       if (this.copy) {
