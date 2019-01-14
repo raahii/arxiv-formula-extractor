@@ -68,6 +68,7 @@ func resolveInputs(mainLatexPath string, basePath string) (string, error) {
 	commands := []string{
 		`\input`,
 		`\include`,
+		`\usepackage`,
 	}
 
 	// replace the command with actual file content
@@ -88,11 +89,23 @@ func resolveInputs(mainLatexPath string, basePath string) (string, error) {
 			// read path in the brace
 			path := source[startIndex+len(com) : endIndex-1]
 			if filepath.Ext(path) == "" {
-				path = path + ".tex"
+				if strings.Contains(com, `\usepackage`) {
+					path = path + ".sty"
+				} else {
+					path = path + ".tex"
+				}
+			}
+
+			path = filepath.Join(basePath, path)
+
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				// remove the command
+				source = source[:startIndex] + source[endIndex:]
+				continue
 			}
 
 			// read file content
-			_source, err := readFile(filepath.Join(basePath, path))
+			_source, err := readFile(path)
 			if err != nil {
 				return "", err
 			}
@@ -184,6 +197,10 @@ func (paper *Paper) readLatexSource(path string) error {
 	}
 	macros := []Macro{}
 	for _, str := range macroStrs {
+		if strings.Contains(str, "@") {
+			continue
+		}
+		// extract command part, ex) \def\bm... -> \bm
 		s := 3 + strings.Index(str[3:], `\`)
 		e := len(str)
 		for _, c := range []string{` `, `}`, `{`, `[`} {
