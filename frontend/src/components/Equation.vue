@@ -43,9 +43,9 @@ export default {
   computed: {
     mathExp: function () {
       let exp;
-      exp  = String.raw`\begin{eqnarray}`
+      exp  = String.raw`$$ \begin{align}`
       exp += this.eq.expression
-      exp += String.raw`\end{eqnarray}`
+      exp += String.raw`\end{align} $$`
       return exp
     },
     expressionWithMacros: function () {

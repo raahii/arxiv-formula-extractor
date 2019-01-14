@@ -25,7 +25,7 @@
       <!-- rendering paper -->
       <div id="result">
         <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
-        <paper :obj="paper" v-if="paper && !isLoading"></paper>
+        <paper :obj="paper" v-if="!isLoading && paper"></paper>
       </div>
     </div>
 
@@ -106,13 +106,14 @@ export default {
         })
         .then(response => {
           self.paper = response.data.paper
-          self.isLoading = false
           self.setUrlParam()
         })
         .catch(error => {
           let errorMsg = error.response.data.code + ": "
           errorMsg += error.response.data.message
           self.error = errorMsg
+        })
+        .then(()=> {
           self.isLoading = false
         })
     },
