@@ -170,6 +170,9 @@ $footer-height-pc: 70px;
     width: 80%;
   }
   @media screen and (min-width:1000px) { 
+    width: 70%;
+  }
+  @media screen and (min-width:1200px) { 
     width: 60%;
   }
 
@@ -247,7 +250,9 @@ $footer-height-pc: 70px;
       width: 80%;
     }
     @media screen and (min-width:1000px) { 
-      padding-top: 20px;
+      width: 70%;
+    }
+    @media screen and (min-width:1200px) { 
       width: 60%;
     }
 

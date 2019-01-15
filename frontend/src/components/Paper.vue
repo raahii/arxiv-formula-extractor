@@ -1,7 +1,7 @@
 <template>
   <div class="paper">
     <div class="paper_title">
-      {{ obj.title }}
+      <a :href="obj.url" target="_blank">{{ obj.title }}</a>
     </div>
     <div class="paper_authors">
       {{ this.authorsStr }}
@@ -62,6 +62,11 @@ export default {
     margin: 5px 0px;
     font-size: x-large;
     font-weight: bold;
+
+    a {
+      color: #2c3e50;
+      text-decoration: none;
+    }
   }
 
   .paper_authors {
