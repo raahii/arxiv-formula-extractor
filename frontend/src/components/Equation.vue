@@ -48,8 +48,12 @@ export default {
     },
     copyExpression: function () {
       let exp = ""
-      exp += this.macros.map(m=>m.expression).join("\n") + "\n\n"
-      exp += this.eq.expression
+      if (this.macros.length > 0) {
+        exp += this.macros.map(m=>m.expression).join("\n") + "\n\n"
+      }
+      exp += String.raw`\begin{eqnarray}` + "\n"
+      exp += this.eq.expression + "\n"
+      exp += String.raw`\end{eqnarray}`
 
       return  exp
     },
