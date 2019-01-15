@@ -15,10 +15,17 @@ export default {
 </script>
 
 <style lang="scss">
-html {
+
+html { 
+  box-sizing: border-box; 
   width: 100%;
   height: 100%;
 }
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 body {
   width: 100%;
   height: 100%;

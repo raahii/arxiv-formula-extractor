@@ -2,36 +2,40 @@
   <div id="top_page">
     <!-- header -->
     <div id="header">
-      <div id="dummy"></div>
-      <div id="title"> <a id="main_title" href="/">{{ serviceName }}</a> <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
+      <div class="dummy"></div>
+      <div id="title">
+        <a id="main_title" href="/">{{ serviceName }}</a> <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
       </div>
       <div id="sns_icons">
-        <a :href="githubUrl" target="_blank"><img id="github" src="/static/github.png"></a>
+        <!-- <a :href="githubUrl" target="_blank"><img id="github" src="/static/github.png"></a> -->
+        <a class="github-button" href="https://github.com/raahii/arxiv-equations" data-size="large" data-show-count="true" aria-label="Star raahii/arxiv-equations on GitHub">Star</a>
       </div>
     </div>
-  
     <div id="main">
-      <!--  search box -->
-      <div id="search_box">
-        <input v-model="arxivUrl" placeholder="https://arxiv.org/abs/...">
-        <button v-on:click="search" v-bind:disabled="isLoading">Go</button>
-      </div>
+      <div class="wrapper">
+        <!--  search box -->
+        <div id="search_box">
+          <input v-model="arxivUrl" placeholder="https://arxiv.org/abs/...">
+          <button v-on:click="search" v-bind:disabled="isLoading">Go</button>
+        </div>
 
-      <!-- error message -->
-      <p class="error" v-if="error">
-        {{ error }}
-      </p>
+        <!-- error message -->
+        <p class="error" v-if="error">
+          {{ error }}
+        </p>
 
-      <!-- rendering paper -->
-      <div id="result">
-        <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
-        <paper :obj="paper" v-if="!isLoading && paper"></paper>
+        <!-- rendering paper -->
+        <div id="result">
+          <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
+          <paper :obj="paper" v-if="!isLoading && paper"></paper>
+        </div>
       </div>
     </div>
 
     <!-- footer -->
     <div id="footer">
-      {{ serviceName }} by <a :href="authorUrl" target="_blank">{{ authorName }}</a>
+       {{ serviceName }} by <a :href="authorUrl" target="_blank">{{ authorName }}</a> <i class="fab fa-angellist"></i> |
+       Contact: <a href="https://twitter.com/messages/compose?recipient_id=3304034184&ref_src=twsrc%5Etfw" class="twitter-dm-button" data-screen-name="@piyo56_net" data-show-count="false" target="_blank">DM</a>
     </div>
   </div>
 </template>
@@ -138,29 +142,47 @@ a {
   color: #42b983;
 }
 #top_page {
-  height: 100%
+  height: 100%;
+  background: #F5F5F5;
 }
 
-$header-height: 120px;
-$footer-height: 70px;
+.dummy {
+  visibility: hidden;
+}
+
+$header-height-sp: 150px;
+$footer-height-sp: 70px;
+$header-height-pc: 120px;
+$footer-height-pc: 70px;
 
 #header {
-  width: 100%;
   box-sizing: border-box;
-  height: $header-height;
-  background: #F5F5F5;
   padding: 20px 0;
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
 
-  #dummy {
-    flex: 15%;
+  height: $header-height-sp;
+  width: 90%;
+  margin: 0 auto;
+
+  @media screen and (min-width:700px) { 
+    width: 80%;
   }
+  @media screen and (min-width:1000px) { 
+    width: 60%;
+  }
+
+  .dummy {
+    flex: 0%;
+  }
+
   #title {
-    flex: 60%;
+    flex: 100%;
     display: inline-flex;
     flex-direction: column;
     margin: 10px 0;
+    text-align: center;
 
     #main_title {
       display: inline-box;
@@ -175,7 +197,7 @@ $footer-height: 70px;
     }
   }
   #sns_icons {
-    flex: 25%;
+    flex: 100%;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -189,14 +211,15 @@ $footer-height: 70px;
   }
   
   @media screen and (min-width:700px) { 
-    #dummy {
-      flex: 33%;
+    height: $header-height-pc;
+    .dummy {
+      flex: 25%;
     }
     #title {
-      flex: 34%;
+      flex: 50%;
     }
     #sns_icons {
-      flex: 33%;
+      flex: 25%;
       #github {
         height: 32px;
         width: 32px;
@@ -205,97 +228,112 @@ $footer-height: 70px;
   }
 }
 #main {
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding-top: 40px;
-  min-height: calc(100% - #{$header-height} - #{$footer-height});
-;
+  padding: 20px 0 20px;
+  background: white;
 
   height: auto;
-  width: 90%;
+  width: 100%;
+
+  min-height: calc(100% - #{$header-height-sp} - #{$footer-height-sp});
   @media screen and (min-width:700px) { 
-    width: 80%;
+    min-height: calc(100% - #{$header-height-pc} - #{$footer-height-pc});
   }
-  @media screen and (min-width:1000px) { 
-    width: 60%;
-  }
+  
+  .wrapper {
+    width: 90%;
+    margin: 0 auto;
 
-  #search_box {
-    width: 100%;
-    margin: 20px auto 20px;
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-
-    input {
-      flex: 0 1 80%;
-      display: block;
-      box-sizing: border-box;
-
-      width: 100%;
-      height: 40px;
-
-      padding: 5px 5px;
-      font-size: 18px;
-      outline: none;
-      border: 1px solid #D1D7E3;
-      border-radius: 4px;
-      line-height: 26px;
-      padding: 8px 36px 8px 14px;
-      box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
-      color: #797C86;
-
-      &::-webkit-input-placeholder {
-        color: #C7C8CC;
-      }
-      &:-moz-placeholder {
-        color: #C7C8CC;
-      }
-      &::-moz-placeholder {
-        color: #C7C8CC;
-      }
-      &:-ms-input-placeholder {
-        color: #C7C8CC;
-      }
+    @media screen and (min-width:700px) { 
+      width: 80%;
     }
-    button {
-      flex: 0 1 20%;
-      display: block;
-      box-sizing: border-box;
-      height: 40px;
-      margin-left: 5px;
-      line-height: 40px;
-
-      border-radius: 4px;
-      background-color: #42b983;
-      border: none;
-      color: white;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 18px;
+    @media screen and (min-width:1000px) { 
+      padding-top: 20px;
+      width: 60%;
     }
-  }
 
-  #result {
-    width: 100%;
-    margin: 20px 0;
-    p {
-      font-size: 14px;
-    }
-    .loading_spinner {
+    #search_box {
       width: 100%;
       margin: 0 auto;
-      text-align: center;
+      display: flex;
+      flex-direction: row;
+      align-content: center;
+
+      input {
+        flex: 0 1 80%;
+        display: block;
+        box-sizing: border-box;
+
+        width: 100%;
+        height: 40px;
+
+        padding: 5px 5px;
+        font-size: 18px;
+        outline: none;
+        border: 1px solid #D1D7E3;
+        border-radius: 4px;
+        line-height: 26px;
+        padding: 8px 36px 8px 14px;
+        box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
+        color: #797C86;
+
+        &::-webkit-input-placeholder {
+          color: #C7C8CC;
+        }
+        &:-moz-placeholder {
+          color: #C7C8CC;
+        }
+        &::-moz-placeholder {
+          color: #C7C8CC;
+        }
+        &:-ms-input-placeholder {
+          color: #C7C8CC;
+        }
+      }
+      button {
+        flex: 0 1 20%;
+        display: block;
+        box-sizing: border-box;
+        height: 40px;
+        margin-left: 5px;
+        line-height: 40px;
+
+        border-radius: 4px;
+        background-color: #42b983;
+        border: none;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 18px;
+      }
+    }
+
+    #result {
+      width: 100%;
+      margin: 20px 0;
+      p {
+        font-size: 14px;
+      }
+      .loading_spinner {
+        width: 100%;
+        margin: 0 auto;
+        text-align: center;
+      }
     }
   }
 }
 
 #footer {
   box-sizing: border-box;
-  height: $footer-height;
+  height: $footer-height-sp;
+  line-height: 0px;
   background: #F5F5F5;
-  padding-top: 25px;
   text-align: center;
+  padding-top: calc(#{$footer-height-sp/2.4);
+
+  @media screen and (min-width:700px) { 
+    height: $footer-height-pc;
+    padding-top: calc(#{$footer-height-pc}/2.4);
+  }
 }
 </style>
