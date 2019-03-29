@@ -4,7 +4,7 @@
 
 [Arxiv Equations](https://arxiv-equations.netlify.com/) provides latex format equations from arxiv paper.
 
-This app is made with `Golang`, `Vue.js` and `MySQL`.
+This app is made with `Go`, `Vue.js` and `MySQL`.
 
 ## Requirement
 
