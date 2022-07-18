@@ -14,10 +14,50 @@ import (
 	"github.com/mattn/go-zglob"
 	"github.com/raahii/arxiv-equations/arxiv"
 	"github.com/raahii/arxiv-equations/config"
-	"github.com/raahii/arxiv-equations/db"
+	"github.com/raahii/arxiv-equations/database"
 	"github.com/raahii/arxiv-equations/latex"
 	"gorm.io/gorm"
 )
+
+func FindPaper(c echo.Context) error {
+	DB := database.GetConnection()
+
+	// obtain url from GET parameters
+	arxivId := c.Param("arxiv_id")
+
+	// find the paper
+	paper := Paper{}
+	err := DB.Where("arxiv_id = ?", arxivId).First(&paper).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// if the paper doesn't exist in the database, fetch the paper
+		paper, err := FetchPaper(arxivId)
+		if err != nil {
+			return err
+		}
+
+		// extract macros and equations
+		vars := config.Config.Variables
+		tarballDir := vars["tarballDir"]
+		err = paper.readLatexSource(tarballDir)
+		if err != nil {
+			return err
+		}
+
+		if dbc := DB.Create(&paper); dbc.Error != nil {
+			return dbc.Error
+		}
+	} else {
+		DB.Where("paper_id = ?", paper.ID).Find(&paper.Equations)
+		DB.Where("paper_id = ?", paper.ID).Find(&paper.Authors)
+		DB.Where("paper_id = ?", paper.ID).Find(&paper.Macros)
+	}
+
+	response := map[string]interface{}{
+		"paper": paper,
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
 
 func readFile(path string) (string, error) {
 	str, err := ioutil.ReadFile(path)
@@ -284,45 +324,4 @@ func FetchPaper(arxivId string) (Paper, error) {
 	paper.TarballUrl = tarballUrl
 
 	return paper, nil
-}
-
-func FindPaper() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// obtain url from GET parameters
-		arxivId := c.Param("arxiv_id")
-
-		// find the paper
-		paper := Paper{}
-		database := db.GetConnection()
-		err := database.Where("arxiv_id = ?", arxivId).First(&paper).Error
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// if the paper doesn't exist in the database, fetch the paper
-			paper, err = FetchPaper(arxivId)
-			if err != nil {
-				return err
-			}
-
-			// extract macros and equations
-			vars := config.Config.Variables
-			tarballDir := vars["tarballDir"]
-			err = paper.readLatexSource(tarballDir)
-			if err != nil {
-				return err
-			}
-
-			if dbc := database.Create(&paper); dbc.Error != nil {
-				return dbc.Error
-			}
-		} else {
-			database.Model(&paper).Preload("Equations").Find(&paper.Equations)
-			database.Model(&paper).Preload("Authors").Find(&paper.Authors)
-			database.Model(&paper).Preload("Macros").Find(&paper.Macros)
-		}
-
-		response := map[string]interface{}{
-			"paper": paper,
-		}
-
-		return c.JSON(http.StatusOK, response)
-	}
 }

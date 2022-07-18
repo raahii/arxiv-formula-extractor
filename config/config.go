@@ -24,7 +24,6 @@ type Database struct {
 }
 
 func SetEnvironment(env string) {
-
 	Config = Conf{}
 
 	// env

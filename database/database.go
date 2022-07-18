@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ var err error
 func Init() {
 	c := config.Config.Database
 
-	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		c.User, c.Password, c.Host, c.Name)
 
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})

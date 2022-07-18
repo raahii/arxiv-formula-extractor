@@ -13,7 +13,7 @@ type Model struct {
 
 type Paper struct {
 	Model
-	ArxivId    string     `json:"arxiv_id gorm:"type:varchar(20);not null;unique_index"`
+	ArxivId    string     `json:"arxiv_id" gorm:"type:varchar(20);not null;unique_index"`
 	Authors    []Author   `json:"authors" gorm:"not null;association_save_reference:true;foreignkey:PaperID"`
 	Title      string     `json:"title" gorm:"not null"`
 	Abstract   string     `json:"abstract" gorm:"not null;type:text"`
@@ -39,7 +39,7 @@ func (Macro) TableName() string {
 
 type Author struct {
 	Model
-	Name    string `json:"name" gorm:not null`
+	Name    string `json:"name" gorm:"not null"`
 	PaperID uint   `json:"paper_id" gorm:"not null"`
 }
 

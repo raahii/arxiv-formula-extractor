@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/raahii/arxiv-equations/config"
 	"github.com/raahii/arxiv-equations/controllers"
-	"github.com/raahii/arxiv-equations/db"
+	"github.com/raahii/arxiv-equations/database"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +22,7 @@ func getPort() string {
 	return port
 }
 
-func initApp(db *gorm.DB) {
+func initApp(DB *gorm.DB) {
 	// Create tables
 	models := []interface{}{
 		&controllers.Paper{},
@@ -31,7 +31,7 @@ func initApp(db *gorm.DB) {
 		&controllers.Macro{},
 	}
 	for _, model := range models {
-		db.AutoMigrate(model)
+		DB.AutoMigrate(model)
 	}
 
 	// Create tarball dirs
@@ -51,9 +51,9 @@ func setConfig() {
 func main() {
 	// read config and open database
 	setConfig()
-	db.Init()
-	database := db.GetConnection()
-	initApp(database)
+	database.Init()
+	DB := database.GetConnection()
+	initApp(DB)
 
 	// instantiate waf object
 	e := echo.New()
@@ -61,7 +61,7 @@ func main() {
 	// middlewares
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{config.Config.Variables["frontAddr"]},
+		AllowOrigins: []string{config.Config.Variables["allowOrigin"]},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 	e.Use(middleware.Recover())
@@ -70,7 +70,7 @@ func main() {
 	e.HTTPErrorHandler = controllers.JSONErrorHandler
 
 	// routing
-	e.GET("/papers/:arxiv_id", controllers.FindPaper())
+	e.GET("/papers/:arxiv_id", controllers.FindPaper)
 
 	// start
 	err := e.Start(":" + getPort())

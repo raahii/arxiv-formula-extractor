@@ -1,2 +1,2 @@
 tarballDir: ./tmp
-frontAddr: https://arxiv-equations.netlify.com
+allowOrigin: https://arxiv-equations.netlify.com

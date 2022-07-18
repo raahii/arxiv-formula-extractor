@@ -1,2 +1,2 @@
 tarballDir: ./tmp
-frontAddr: http://localhost:8080
+allowOrigin: "*"
