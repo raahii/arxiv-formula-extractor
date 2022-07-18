@@ -11,14 +11,14 @@
         >
       </div>
       <div id="sns_icons">
-        <a
-          class="github-button"
-          href="https://github.com/raahii/arxiv-formula-extractor"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Star raahii/arxiv-formula-extractor on GitHub"
-          >Star</a
-        >
+        <iframe
+          src="https://ghbtns.com/github-btn.html?user=raahii&repo=arxiv-formula-extractor&type=star&count=true&size=large"
+          frameborder="0"
+          scrolling="0"
+          width="170"
+          height="30"
+          title="GitHub"
+        ></iframe>
       </div>
     </div>
     <div id="main">
@@ -187,9 +187,6 @@ $footer-height-pc: 70px;
   width: 90%;
   margin: 0 auto;
 
-  @media screen and (min-width: 700px) {
-    width: 80%;
-  }
   @media screen and (min-width: 1000px) {
     width: 70%;
   }
@@ -215,39 +212,34 @@ $footer-height-pc: 70px;
       color: #2c3e50;
       text-decoration: none;
     }
+
     #sub_title {
       display: inline-box;
       margin: 0 auto;
     }
   }
+
   #sns_icons {
     flex: 100%;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    #github {
-      height: 24px;
-      width: 24px;
-      border-radius: 50%;
-      box-shadow: 0 6px 12px -2px rgba(107, 117, 161, 0.16);
-    }
+    padding-left: 80px;
   }
 
   @media screen and (min-width: 700px) {
     height: $header-height-pc;
     .dummy {
-      flex: 25%;
+      flex: 10%;
     }
     #title {
       flex: 50%;
     }
     #sns_icons {
-      flex: 25%;
-      #github {
-        height: 32px;
-        width: 32px;
-      }
+      flex: 10%;
+      justify-content: space-between;
+      padding-left: 0px;
     }
   }
 }
