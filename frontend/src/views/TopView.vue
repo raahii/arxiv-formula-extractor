@@ -4,10 +4,12 @@
     <div id="header">
       <div class="dummy"></div>
       <div id="title">
-        <a id="main_title" href="/">{{ serviceName }}</a>
+        <a id="main_title" href="/"
+          ><h1>{{ serviceName }}</h1></a
+        >
         <span id="sub_title">
           You can copy all formulas in an
-          <a href="https://arxiv.org/" target="_blank">Arxiv</a> paper.</span
+          <a href="https://arxiv.org/" target="_blank">arXiv</a> paper.</span
         >
       </div>
       <div id="sns_icons">
@@ -78,7 +80,7 @@ export default {
       isLoading: false,
 
       // constants
-      serviceName: "Arxiv Formula Extractor",
+      serviceName: "ArXiv Formula Extractor",
       authorName: "raahii",
       authorUrl: "https://raahii.github.io/about/",
       baseUrl: "https://arxiv.org/abs/",
@@ -208,9 +210,13 @@ $footer-height-pc: 70px;
     #main_title {
       display: inline-box;
       margin: 0 auto;
-      font-size: 32px;
       color: #2c3e50;
       text-decoration: none;
+
+      h1 {
+        font-size: 32px;
+        margin: 0;
+      }
     }
 
     #sub_title {
