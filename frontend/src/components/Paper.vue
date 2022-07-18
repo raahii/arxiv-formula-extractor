@@ -7,47 +7,53 @@
       {{ this.authorsStr }}
     </div>
     <div class="paper_equations">
-      <p class="n_hits success"> {{ this.obj.equations.length }} equations found.</p>
+      <p class="n_hits success">
+        {{ this.obj.equations.length }} equations found.
+      </p>
       <macro :macros="obj.macros"></macro>
-      <equation :eq="eq" :macros="equationMacros[i]" :key="eq.id" v-for="(eq, i) in obj.equations" ></equation>
+      <equation
+        :eq="eq"
+        :macros="equationMacros[i]"
+        :key="eq.id"
+        v-for="(eq, i) in obj.equations"
+      ></equation>
     </div>
   </div>
 </template>
 
 <script>
-import Equation from './Equation.vue'
-import Macro from './Macro.vue'
+import Equation from "./Equation.vue";
+import Macro from "./Macro.vue";
 
 export default {
-  name: 'Paper',
+  name: "Paper",
   components: {
-    "equation": Equation,
-    "macro": Macro,
+    equation: Equation,
+    macro: Macro,
   },
-  props: ['obj'],
-  data () {
-    return {
-    }
+  props: ["obj"],
+  data() {
+    return {};
   },
   computed: {
     authorsStr: function () {
-      return this.obj.authors.map(a => a.name).join(", ")
+      return this.obj.authors.map((a) => a.name).join(", ");
     },
     equationMacros: function () {
-      let macros = []
+      let macros = [];
       for (let eq of this.obj.equations) {
-        let _macros = []
+        let _macros = [];
         for (let m of this.obj.macros) {
           if (eq.expression.indexOf(m.command) >= 0) {
-            _macros.push(m)
+            _macros.push(m);
           }
         }
-        macros.push(_macros)
+        macros.push(_macros);
       }
-      return macros
+      return macros;
     },
   },
-}
+};
 </script>
 
 <style scoped lang="scss">

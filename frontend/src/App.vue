@@ -1,28 +1,25 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <script>
-import PulseLoader from "vue-spinner/src/PulseLoader";
 export default {
-  name: 'App',
-  components: {
-    PulseLoader
-  }
-}
+  name: "App",
+};
 </script>
 
 <style lang="scss">
-
-html { 
-  box-sizing: border-box; 
+html {
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   box-sizing: inherit;
 }
 
@@ -34,7 +31,7 @@ body {
 #app {
   width: 100%;
   height: 100%;
-  font-family: 'Sarabun', Helvetica, Arial, sans-serif;
+  font-family: "Sarabun", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -54,7 +51,7 @@ body {
     border: 1px solid transparent;
     border-radius: 4px;
   }
-  .success{
+  .success {
     font-size: 1.2em;
     line-height: 1.5;
     color: #31708f;

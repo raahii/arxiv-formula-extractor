@@ -4,19 +4,29 @@
     <div id="header">
       <div class="dummy"></div>
       <div id="title">
-        <a id="main_title" href="/">{{ serviceName }}</a> <span id="sub_title"> provides latex format equations from <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span>
+        <a id="main_title" href="/">{{ serviceName }}</a>
+        <span id="sub_title">
+          provides latex format equations from
+          <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span
+        >
       </div>
       <div id="sns_icons">
-        <!-- <a :href="githubUrl" target="_blank"><img id="github" src="/static/github.png"></a> -->
-        <a class="github-button" href="https://github.com/raahii/arxiv-equations" data-size="large" data-show-count="true" aria-label="Star raahii/arxiv-equations on GitHub">Star</a>
+        <a
+          class="github-button"
+          href="https://github.com/raahii/arxiv-equations"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Star raahii/arxiv-equations on GitHub"
+          >Star</a
+        >
       </div>
     </div>
     <div id="main">
       <div class="wrapper">
         <!--  search box -->
         <div id="search_box">
-          <input v-model="arxivUrl" placeholder="https://arxiv.org/abs/...">
-          <button v-on:click="search" v-bind:disabled="isLoading">Go</button>
+          <input v-model="arxivUrl" placeholder="https://arxiv.org/abs/..." />
+          <button v-on:click="search" :disabled="isLoading">Go</button>
         </div>
 
         <!-- error message -->
@@ -26,109 +36,121 @@
 
         <!-- rendering paper -->
         <div id="result">
-          <pulse-loader class='loading_spinner' :loading="isLoading"></pulse-loader>
-          <paper :obj="paper" v-if="!isLoading && paper"></paper>
+          <PulseLoader class="loading_spinner" :loading="isLoading" />
+          <Paper :obj="paper" v-if="!isLoading && paper" />
         </div>
       </div>
     </div>
 
     <!-- footer -->
     <div id="footer">
-       {{ serviceName }} by <a :href="authorUrl" target="_blank">{{ authorName }}</a> <i class="fab fa-angellist"></i> |
-       Contact: <a href="https://twitter.com/messages/compose?recipient_id=3304034184&ref_src=twsrc%5Etfw" class="twitter-dm-button" data-screen-name="@piyo56_net" data-show-count="false" target="_blank">DM</a>
+      {{ serviceName }} by
+      <a :href="authorUrl" target="_blank">{{ authorName }}</a>
+      <i class="fab fa-angellist"></i> | Contact:
+      <a
+        href="https://twitter.com/messages/compose?recipient_id=3304034184&ref_src=twsrc%5Etfw"
+        class="twitter-dm-button"
+        data-screen-name="@piyo56_net"
+        data-show-count="false"
+        target="_blank"
+        >DM</a
+      >
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-import Paper from './Paper.vue'
+import axios from "axios";
+import Paper from "@/components/Paper.vue";
 import PulseLoader from "vue-spinner/src/PulseLoader";
 
 export default {
-  name: 'TopPage',
+  name: "TopView",
   components: {
-    "paper": Paper,
-    "pulse-loader": PulseLoader,
+    Paper,
+    PulseLoader,
   },
-  data () {
+  data() {
     return {
-      serviceName: 'Arxiv Equations',
-      serviceUrl: 'http://localhost:8000',
-      authorName: 'raahii',
-      authorUrl: 'https://raahii.github.io/about/',
-      baseUrl: "https://arxiv.org/abs/",
-      githubUrl: "https://github.com/raahii/arxiv-equations",
-
-      baseUrl: "https://arxiv.org/abs/",
-      regex: new RegExp("https?://arxiv.org/abs/([0-9.]+)(v[0-9]+)?$"),
-
-      arxivUrl: '',
+      arxivUrl: "",
       paper: null,
       error: null,
       isLoading: false,
-    }
+
+      // constants
+      serviceName: "Arxiv Equations",
+      authorName: "raahii",
+      authorUrl: "https://raahii.github.io/about/",
+      baseUrl: "https://arxiv.org/abs/",
+      githubUrl: "https://github.com/raahii/arxiv-equations",
+
+      regex: new RegExp("https?://arxiv.org/abs/([0-9.]+)(v[0-9]+)?$"),
+    };
   },
-  mounted: function() {
-    var arxivId = this.$route.query.arxiv_id
+  mounted: function () {
+    var arxivId = this.$route.query.arxiv_id;
     if (arxivId) {
-      this.arxivUrl = this.baseUrl + arxivId
-      this.search()
+      this.arxivUrl = this.baseUrl + arxivId;
+      this.search();
     }
   },
   methods: {
-    search: function(e) {
-      this.error = null
+    search: function () {
+      this.error = null;
       if (this.checkUrl()) {
-        this.findPaper()
+        this.findPaper();
       }
     },
     checkUrl: function () {
-      let m = this.arxivUrl.match(this.regex)
+      let m = this.arxivUrl.match(this.regex);
       if (m === null) {
         if (this.arxivUrl.indexOf(this.baseUrl) == -1) {
-          this.error = "The url must start 'https://arxiv.org/abs/'"
-        }  else {
-          this.error = "Invalid arxiv url."
+          this.error = "The url must start 'https://arxiv.org/abs/'";
+        } else {
+          this.error = "Invalid arxiv url.";
         }
-        return false
+        return false;
       }
-      
-      return true
+
+      return true;
     },
-    setUrlParam: function() {
-      this.$router.push({query: {arxiv_id: this.arxivId}})
+    setUrlParam: function () {
+      this.$router.push({ query: { arxiv_id: this.arxivId } });
     },
     findPaper: function () {
-      this.isLoading = true
-      this.paper = null
-      
-      let self = this
+      this.isLoading = true;
+      this.paper = null;
+
+      let self = this;
       axios({
-          method : 'GET',
-          url    : '/papers/' + self.arxivId,
+        baseURL: this.apiUrl,
+        method: "GET",
+        url: "/papers/" + self.arxivId,
+      })
+        .then((response) => {
+          self.paper = response.data.paper;
+          self.setUrlParam();
         })
-        .then(response => {
-          self.paper = response.data.paper
-          self.setUrlParam()
+        .catch((error) => {
+          let errorMsg = error.response.data.code + ": ";
+          errorMsg += error.response.data.message;
+          self.error = errorMsg;
         })
-        .catch(error => {
-          let errorMsg = error.response.data.code + ": "
-          errorMsg += error.response.data.message
-          self.error = errorMsg
-        })
-        .then(()=> {
-          self.isLoading = false
-        })
+        .finally(() => {
+          self.isLoading = false;
+        });
     },
   },
   computed: {
     arxivId: function () {
-      let m = this.arxivUrl.match(this.regex)
-      return m[1]
-    }
-  }
-}
+      let m = this.arxivUrl.match(this.regex);
+      return m[1];
+    },
+    apiUrl: function () {
+      return process.env.VUE_APP_API_URL;
+    },
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -143,7 +165,7 @@ a {
 }
 #top_page {
   height: 100%;
-  background: #F5F5F5;
+  background: #f5f5f5;
 }
 
 .dummy {
@@ -166,13 +188,13 @@ $footer-height-pc: 70px;
   width: 90%;
   margin: 0 auto;
 
-  @media screen and (min-width:700px) { 
+  @media screen and (min-width: 700px) {
     width: 80%;
   }
-  @media screen and (min-width:1000px) { 
+  @media screen and (min-width: 1000px) {
     width: 70%;
   }
-  @media screen and (min-width:1200px) { 
+  @media screen and (min-width: 1200px) {
     width: 60%;
   }
 
@@ -212,8 +234,8 @@ $footer-height-pc: 70px;
       box-shadow: 0 6px 12px -2px rgba(107, 117, 161, 0.16);
     }
   }
-  
-  @media screen and (min-width:700px) { 
+
+  @media screen and (min-width: 700px) {
     height: $header-height-pc;
     .dummy {
       flex: 25%;
@@ -238,21 +260,21 @@ $footer-height-pc: 70px;
   width: 100%;
 
   min-height: calc(100% - #{$header-height-sp} - #{$footer-height-sp});
-  @media screen and (min-width:700px) { 
+  @media screen and (min-width: 700px) {
     min-height: calc(100% - #{$header-height-pc} - #{$footer-height-pc});
   }
-  
+
   .wrapper {
     width: 90%;
     margin: 0 auto;
 
-    @media screen and (min-width:700px) { 
+    @media screen and (min-width: 700px) {
       width: 80%;
     }
-    @media screen and (min-width:1000px) { 
+    @media screen and (min-width: 1000px) {
       width: 70%;
     }
-    @media screen and (min-width:1200px) { 
+    @media screen and (min-width: 1200px) {
       width: 60%;
     }
 
@@ -274,24 +296,24 @@ $footer-height-pc: 70px;
         padding: 5px 5px;
         font-size: 18px;
         outline: none;
-        border: 1px solid #D1D7E3;
+        border: 1px solid #d1d7e3;
         border-radius: 4px;
         line-height: 26px;
         padding: 8px 36px 8px 14px;
-        box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
-        color: #797C86;
+        box-shadow: 0 4px 12px -2px rgba(#6b75a1, 0.16);
+        color: #797c86;
 
         &::-webkit-input-placeholder {
-          color: #C7C8CC;
+          color: #c7c8cc;
         }
         &:-moz-placeholder {
-          color: #C7C8CC;
+          color: #c7c8cc;
         }
         &::-moz-placeholder {
-          color: #C7C8CC;
+          color: #c7c8cc;
         }
         &:-ms-input-placeholder {
-          color: #C7C8CC;
+          color: #c7c8cc;
         }
       }
       button {
@@ -332,13 +354,13 @@ $footer-height-pc: 70px;
   box-sizing: border-box;
   height: $footer-height-sp;
   line-height: 0px;
-  background: #F5F5F5;
+  background: #f5f5f5;
   text-align: center;
-  padding-top: calc(#{$footer-height-sp/2.4);
+  padding-top: calc(#{$footer-height-sp}/ 2.4);
 
-  @media screen and (min-width:700px) { 
+  @media screen and (min-width: 700px) {
     height: $footer-height-pc;
-    padding-top: calc(#{$footer-height-pc}/2.4);
+    padding-top: calc(#{$footer-height-pc}/ 2.4);
   }
 }
 </style>

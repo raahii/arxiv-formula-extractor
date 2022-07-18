@@ -1,16 +1,21 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import TopPage from '@/components/TopPage'
+import Vue from "vue";
+import VueRouter from "vue-router";
+import TopPage from "@/views/TopView";
 
-Vue.use(Router)
+Vue.use(VueRouter);
 
-export default new Router({
-  mode: 'history',
-  routes: [
-    {
-      path: '/',
-      name: 'TopPage',
-      component: TopPage
-    },
-  ]
-})
+const routes = [
+  {
+    path: "/",
+    name: "TopPage",
+    component: TopPage,
+  },
+];
+
+const router = new VueRouter({
+  mode: "history",
+  base: process.env.BASE_URL,
+  routes,
+});
+
+export default router;

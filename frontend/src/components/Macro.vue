@@ -5,33 +5,33 @@
 </template>
 
 <script>
-import { VueMathjax } from 'vue-mathjax'
+import { VueMathjax } from "vue-mathjax";
 
 export default {
-  name: 'Macro',
+  name: "Macro",
   components: {
-   'vue-mathjax': VueMathjax
+    "vue-mathjax": VueMathjax,
   },
-  props: ['macros'],
-  data()  {
+  props: ["macros"],
+  data() {
     return {
-      "defaultMacros": [
+      defaultMacros: [
         "\\newcommand{\\bm}[1]{\\boldsymbol #1}",
         "\\newcommand{textnormal}[1]{\\textrm{#1}}",
       ],
-    }
+    };
   },
   computed: {
     macroExp: function () {
-      let exp
-      exp  = String.raw`\\(` + "\n"
-      exp += this.defaultMacros.join("\n") + "\n"
-      exp += this.macros.map(m => m.expression).join("\n") + "\n"
-      exp += String.raw`\\)`
-      return exp
-    }
-  }
-}
+      let exp;
+      exp = String.raw`\\(` + "\n";
+      exp += this.defaultMacros.join("\n") + "\n";
+      exp += this.macros.map((m) => m.expression).join("\n") + "\n";
+      exp += String.raw`\\)`;
+      return exp;
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">

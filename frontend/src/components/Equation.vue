@@ -1,71 +1,72 @@
 <template>
   <div v-on:mouseleave="onMouseLeave" class="equation card">
-    <vue-mathjax 
-      class="expression" 
+    <vue-mathjax
+      class="expression"
       :formula="renderExpression"
       v-clipboard:copy="copyExpression"
       v-clipboard:success="onCopy"
-      v-clipboard:error="onError"></vue-mathjax>
+      v-clipboard:error="onError"
+    ></vue-mathjax>
     <p class="copy_label">
-    <span v-show="copy"><i class="far fa-clipboard"></i>copy</span>
-    <span v-show="!copy"><i class="fas fa-check"></i>copied</span>
+      <span v-show="copy"><i class="far fa-clipboard"></i>copy</span>
+      <span v-show="!copy"><i class="fas fa-check"></i>copied</span>
     </p>
   </div>
 </template>
 
 <script>
-import { VueMathjax } from 'vue-mathjax'
+import { VueMathjax } from "vue-mathjax";
 
 export default {
-  name: 'Paper',
+  name: "Paper",
   components: {
-   'vue-mathjax': VueMathjax
+    "vue-mathjax": VueMathjax,
   },
-  data () {
+  data() {
     return {
       copy: true,
-    }
+    };
   },
-  props: ['eq', 'macros'],
+  props: ["eq", "macros"],
   methods: {
-    onCopy: function (e) {
-      this.copy = false
+    onCopy: function () {
+      this.copy = false;
     },
-    onError: function (e) {
-      console.error("copy error")
+    onError: function () {
+      console.error("copy error");
     },
-    onMouseLeave: function (e) {
-      this.copy = true
-    }
+    onMouseLeave: function () {
+      this.copy = true;
+    },
   },
   computed: {
     renderExpression: function () {
-      let exp = ""
-      exp += String.raw`$$ \begin{align}` + "\n"
-      exp += this.eq.expression + "\n"
-      exp += String.raw`\end{align} $$`
-      return exp
+      let exp = "";
+      exp += String.raw`$$ \begin{align}` + "\n";
+      exp += this.eq.expression + "\n";
+      exp += String.raw`\end{align} $$`;
+      return exp;
     },
     copyExpression: function () {
-      let exp = ""
+      let exp = "";
       if (this.macros.length > 0) {
-        exp += this.macros.map(m=>m.expression).join("\n") + "\n\n"
+        exp += this.macros.map((m) => m.expression).join("\n") + "\n\n";
       }
-      exp += String.raw`\begin{eqnarray}` + "\n"
-      exp += this.eq.expression + "\n"
-      exp += String.raw`\end{eqnarray}`
+      exp += String.raw`\begin{eqnarray}` + "\n";
+      exp += this.eq.expression + "\n";
+      exp += String.raw`\end{eqnarray}`;
 
-      return  exp
+      return exp;
     },
     labelText: function () {
       if (this.copy) {
-        return "copy"
+        return "copy";
       } else {
-        return "copied!"
+        return "copied!";
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">
@@ -83,7 +84,7 @@ export default {
 
   visibility: hidden;
   opacity: 0;
-  transition: .3s linear;
+  transition: 0.3s linear;
 
   position: absolute;
   top: 0;
@@ -95,14 +96,14 @@ export default {
   outline: none;
   border-top: none;
   border-right: none;
-  border-left: solid 1px #D1D7E3;
-  border-bottom: solid 1px #D1D7E3;
+  border-left: solid 1px #d1d7e3;
+  border-bottom: solid 1px #d1d7e3;
   line-height: 24px;
-  box-shadow: 0 4px 12px -2px rgba(#6B75A1, .16);
+  box-shadow: 0 4px 12px -2px rgba(#6b75a1, 0.16);
 
   i {
     margin-right: 4px;
-    color: #797C86;
+    color: #797c86;
   }
 
   .fa-clipboard {
@@ -122,13 +123,13 @@ export default {
 .card {
   border: 1px solid;
   border-color: #cccccc;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .card:hover {
   cursor: pointer;
-  box-shadow: 0 5px 5px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25), 0 5px 5px rgba(0, 0, 0, 0.22);
 }
 
 .card:hover .copy_label {
