@@ -23,16 +23,16 @@ func getPort() string {
 }
 
 func initApp(DB *gorm.DB) {
-	// Create tables
-	models := []interface{}{
-		&controllers.Paper{},
-		&controllers.Equation{},
-		&controllers.Author{},
-		&controllers.Macro{},
-	}
-	for _, model := range models {
-		DB.AutoMigrate(model)
-	}
+	// // Create tables
+	// models := []interface{}{
+	// 	&controllers.Paper{},
+	// 	&controllers.Equation{},
+	// 	&controllers.Author{},
+	// 	&controllers.Macro{},
+	// }
+	// for _, model := range models {
+	// 	DB.AutoMigrate(model)
+	// }
 
 	// Create tarball dirs
 	vars := config.Config.Variables

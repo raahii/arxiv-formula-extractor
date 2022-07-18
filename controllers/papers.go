@@ -30,7 +30,7 @@ func FindPaper(c echo.Context) error {
 	err := DB.Where("arxiv_id = ?", arxivId).First(&paper).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// if the paper doesn't exist in the database, fetch the paper
-		paper, err := FetchPaper(arxivId)
+		paper, err = FetchPaper(arxivId)
 		if err != nil {
 			return err
 		}
