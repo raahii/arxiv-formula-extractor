@@ -1,4 +1,4 @@
-module github.com/raahii/arxiv-equations
+module github.com/raahii/arxiv-formula-extractor
 
 go 1.18
 

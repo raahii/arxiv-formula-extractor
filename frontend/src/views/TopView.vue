@@ -6,17 +6,17 @@
       <div id="title">
         <a id="main_title" href="/">{{ serviceName }}</a>
         <span id="sub_title">
-          provides latex format equations from
-          <a href="https://arxiv.org/" target="_blank">Arxiv</a>.</span
+          You can copy all formulas in an
+          <a href="https://arxiv.org/" target="_blank">Arxiv</a> paper.</span
         >
       </div>
       <div id="sns_icons">
         <a
           class="github-button"
-          href="https://github.com/raahii/arxiv-equations"
+          href="https://github.com/raahii/arxiv-formula-extractor"
           data-size="large"
           data-show-count="true"
-          aria-label="Star raahii/arxiv-equations on GitHub"
+          aria-label="Star raahii/arxiv-formula-extractor on GitHub"
           >Star</a
         >
       </div>
@@ -78,11 +78,10 @@ export default {
       isLoading: false,
 
       // constants
-      serviceName: "Arxiv Equations",
+      serviceName: "Arxiv Formula Extractor",
       authorName: "raahii",
       authorUrl: "https://raahii.github.io/about/",
       baseUrl: "https://arxiv.org/abs/",
-      githubUrl: "https://github.com/raahii/arxiv-equations",
 
       regex: new RegExp("https?://arxiv.org/abs/([0-9.]+)(v[0-9]+)?$"),
     };

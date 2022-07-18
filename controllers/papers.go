@@ -12,10 +12,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mattn/go-zglob"
-	"github.com/raahii/arxiv-equations/arxiv"
-	"github.com/raahii/arxiv-equations/config"
-	"github.com/raahii/arxiv-equations/database"
-	"github.com/raahii/arxiv-equations/latex"
+	"github.com/raahii/arxiv-formula-extractor/arxiv"
+	"github.com/raahii/arxiv-formula-extractor/config"
+	"github.com/raahii/arxiv-formula-extractor/database"
+	"github.com/raahii/arxiv-formula-extractor/latex"
 	"gorm.io/gorm"
 )
 

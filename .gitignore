@@ -1,6 +1,5 @@
-.idea
-
-vendor
+arxiv-formula-extractor
 
 tmp/*
 !.gitkeep
+

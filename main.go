@@ -7,9 +7,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/raahii/arxiv-equations/config"
-	"github.com/raahii/arxiv-equations/controllers"
-	"github.com/raahii/arxiv-equations/database"
+	"github.com/raahii/arxiv-formula-extractor/config"
+	"github.com/raahii/arxiv-formula-extractor/controllers"
+	"github.com/raahii/arxiv-formula-extractor/database"
 	"gorm.io/gorm"
 )
 

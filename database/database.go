@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/raahii/arxiv-equations/config"
+	"github.com/raahii/arxiv-formula-extractor/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
