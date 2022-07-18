@@ -42,6 +42,8 @@ jobs:
 
       - name: Build code
         run: npm ci && npm run build
+        env:
+          VUE_APP_API_URL: ${{ secrets.VUE_APP_API_URL }}
 
       - name: Deploy resources to Netlify
         run: npx netlify-cli deploy --prod --dir=./dist

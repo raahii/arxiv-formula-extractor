@@ -243,6 +243,7 @@ $footer-height-pc: 70px;
     }
   }
 }
+
 #main {
   padding: 20px 0 20px;
   background: white;
