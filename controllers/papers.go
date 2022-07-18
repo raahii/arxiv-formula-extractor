@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,12 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/labstack/echo"
-	zglob "github.com/mattn/go-zglob"
+	"github.com/labstack/echo/v4"
+	"github.com/mattn/go-zglob"
 	"github.com/raahii/arxiv-equations/arxiv"
 	"github.com/raahii/arxiv-equations/config"
 	"github.com/raahii/arxiv-equations/db"
 	"github.com/raahii/arxiv-equations/latex"
+	"gorm.io/gorm"
 )
 
 func readFile(path string) (string, error) {
@@ -292,9 +294,10 @@ func FindPaper() echo.HandlerFunc {
 		// find the paper
 		paper := Paper{}
 		database := db.GetConnection()
-		if database.Where("arxiv_id = ?", arxivId).First(&paper).RecordNotFound() {
+		err := database.Where("arxiv_id = ?", arxivId).First(&paper).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// if the paper doesn't exist in the database, fetch the paper
-			_paper, err := FetchPaper(arxivId)
+			paper, err = FetchPaper(arxivId)
 			if err != nil {
 				return err
 			}
@@ -302,19 +305,18 @@ func FindPaper() echo.HandlerFunc {
 			// extract macros and equations
 			vars := config.Config.Variables
 			tarballDir := vars["tarballDir"]
-			err = _paper.readLatexSource(tarballDir)
+			err = paper.readLatexSource(tarballDir)
 			if err != nil {
 				return err
 			}
 
-			if dbc := database.Create(&_paper); dbc.Error != nil {
+			if dbc := database.Create(&paper); dbc.Error != nil {
 				return dbc.Error
 			}
-			paper = _paper
 		} else {
-			database.Model(&paper).Related(&paper.Equations)
-			database.Model(&paper).Related(&paper.Authors)
-			database.Model(&paper).Related(&paper.Macros)
+			database.Model(&paper).Preload("Equations").Find(&paper.Equations)
+			database.Model(&paper).Preload("Authors").Find(&paper.Authors)
+			database.Model(&paper).Preload("Macros").Find(&paper.Macros)
 		}
 
 		response := map[string]interface{}{

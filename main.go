@@ -5,12 +5,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/raahii/arxiv-equations/config"
 	"github.com/raahii/arxiv-equations/controllers"
 	"github.com/raahii/arxiv-equations/db"
+	"gorm.io/gorm"
 )
 
 func getPort() string {
@@ -54,7 +54,6 @@ func main() {
 	db.Init()
 	database := db.GetConnection()
 	initApp(database)
-	defer database.Close()
 
 	// instantiate waf object
 	e := echo.New()

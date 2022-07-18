@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type APIError struct {
@@ -17,27 +17,21 @@ func newErrorWithMsg(err error, msg string) error {
 	return fmt.Errorf(msg)
 }
 
-// error handler which returns errors in json format
+// JSONErrorHandler returns errors in json format
 func JSONErrorHandler(err error, c echo.Context) {
 	var code int
 	var msg string
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 		msg = he.Message.(string)
-		// msg = string(he.Message)
 	} else {
 		code = http.StatusInternalServerError
 		msg = err.Error()
 	}
 
-	apierr := APIError{
-		code,
-		msg,
-	}
-
 	c.Logger().Error(err)
 
 	if !c.Response().Committed {
-		c.JSON(code, apierr)
+		c.JSON(code, APIError{code, msg})
 	}
 }

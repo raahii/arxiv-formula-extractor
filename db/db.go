@@ -1,11 +1,12 @@
 package db
 
 import (
+	"fmt"
 	"log"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/raahii/arxiv-equations/config"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
@@ -14,12 +15,10 @@ var err error
 func Init() {
 	c := config.Config.Database
 
-	user := c.User
-	password := c.Password
-	dbname := c.Name
-	host := c.Host
+	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8&parseTime=True&loc=Local",
+		c.User, c.Password, c.Host, c.Name)
 
-	db, err = gorm.Open("mysql", user+":"+password+"@"+host+"/"+dbname+"?charset=utf8&parseTime=True&loc=Local")
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
